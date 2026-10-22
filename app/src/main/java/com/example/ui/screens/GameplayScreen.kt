@@ -51,6 +51,7 @@ fun GameplayScreen(
     val timedSeconds by viewModel.timedRemainingSeconds.collectAsState()
     val playerProfile by viewModel.playerProfile.collectAsState()
 
+    val currentMode by viewModel.currentMode.collectAsState()
     val showPause by viewModel.showPauseDialog.collectAsState()
     val showComplete by viewModel.showLevelCompleteDialog.collectAsState()
     val starsEarned by viewModel.starsEarned.collectAsState()
@@ -60,10 +61,14 @@ fun GameplayScreen(
 
     val currentBoard = boardData ?: return
 
+    val themeKey = playerProfile.selectedBoardTheme
+    val activeGradient = getThemeBackground(themeKey, world.backgroundGradient)
+    val activeCardBg = getThemeCardBackground(themeKey, world.cardBackground)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(world.backgroundGradient))
+            .background(Brush.verticalGradient(activeGradient))
             .testTag("gameplay_screen_root")
     ) {
         AmbientParticlesBackground()
@@ -79,6 +84,7 @@ fun GameplayScreen(
             // Header Bar
             TopGameBar(
                 levelNumber = currentBoard.levelNumber,
+                isDaily = currentMode == GameMode.DAILY,
                 worldName = world.name,
                 coins = playerProfile.coins,
                 difficultyTier = currentBoard.difficultyTier,
@@ -94,7 +100,7 @@ fun GameplayScreen(
                 revealedLetters = revealedLetters,
                 firstLetterHints = firstLetterHints,
                 temporaryPathHint = temporaryPathHint,
-                boardBackgroundColor = world.cardBackground,
+                boardBackgroundColor = activeCardBg,
                 onWordSelected = { letters, path ->
                     viewModel.onWordSelected(letters, path)
                 },

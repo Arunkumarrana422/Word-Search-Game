@@ -53,6 +53,8 @@ import com.example.ui.components.AmbientParticlesBackground
 import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.SurfaceCardDark
+import com.example.ui.theme.glassBorder
+import com.example.ui.theme.glassCardColors
 
 @Composable
 fun SettingsScreen(
@@ -87,17 +89,20 @@ fun SettingsScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            // Header
+            // Header Pill
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestPurple.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
                         .testTag("settings_back_button")
@@ -109,16 +114,18 @@ fun SettingsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
                     text = "Settings",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
                 )
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -162,9 +169,11 @@ fun SettingsScreen(
                 // Volume Slider
                 item {
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .glassBorder(RoundedCornerShape(18.dp), borderColor = QuestPurple),
                         shape = RoundedCornerShape(18.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.88f))
+                        colors = glassCardColors()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(
@@ -203,11 +212,12 @@ fun SettingsScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .glassBorder(RoundedCornerShape(18.dp), borderColor = QuestPurple)
                             .clip(RoundedCornerShape(18.dp))
                             .clickable(onClick = onOpenThemeSelection)
                             .testTag("settings_theme_button"),
                         shape = RoundedCornerShape(18.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.88f))
+                        colors = glassCardColors()
                     ) {
                         Row(
                             modifier = Modifier
@@ -248,6 +258,7 @@ fun SettingsScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .glassBorder(RoundedCornerShape(18.dp), borderColor = Color(0xFFFF5252))
                             .clip(RoundedCornerShape(18.dp))
                             .clickable(onClick = onRequestReset)
                             .testTag("settings_reset_progress_button"),
@@ -312,9 +323,11 @@ private fun SettingsToggleCard(
     onCheckedChange: (Boolean) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassBorder(RoundedCornerShape(18.dp), borderColor = QuestPurple),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.88f))
+        colors = glassCardColors()
     ) {
         Row(
             modifier = Modifier

@@ -45,6 +45,8 @@ import com.example.ui.theme.QuestGreen
 import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.SurfaceCardDark
+import com.example.ui.theme.glassBorder
+import com.example.ui.theme.glassCardColors
 
 data class ThemeOption(
     val key: String,
@@ -113,17 +115,20 @@ fun ThemeSelectionScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            // Header
+            // Header Pill
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestPurple.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
                         .testTag("theme_selection_back_button")
@@ -135,16 +140,18 @@ fun ThemeSelectionScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
                     text = "Board Themes",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
                 )
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -156,11 +163,12 @@ fun ThemeSelectionScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .glassBorder(RoundedCornerShape(20.dp), borderColor = if (isSelected) QuestGreen else QuestPurple)
                             .clip(RoundedCornerShape(20.dp))
                             .clickable { onSelectTheme(opt.key) }
                             .testTag("theme_option_${opt.key}"),
                         shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.9f)),
+                        colors = glassCardColors(),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Row(
@@ -228,3 +236,24 @@ fun ThemeSelectionScreen(
         }
     }
 }
+
+fun getThemeBackground(themeKey: String, worldGradient: List<Color>): List<Color> {
+    return when (themeKey) {
+        "NEON" -> listOf(Color(0xFF0A0314), Color(0xFF180A30), Color(0xFF2C1052))
+        "MIDNIGHT" -> listOf(Color(0xFF04060C), Color(0xFF0A0F1D), Color(0xFF131D35))
+        "GOLD" -> listOf(Color(0xFF261803), Color(0xFF3E2723), Color(0xFF5D4037))
+        "PASTEL" -> listOf(Color(0xFF2D1424), Color(0xFF4A1F3B), Color(0xFF6B2B55))
+        else -> worldGradient
+    }
+}
+
+fun getThemeCardBackground(themeKey: String, worldCardBg: Color): Color {
+    return when (themeKey) {
+        "NEON" -> Color(0xFF1F0D3D)
+        "MIDNIGHT" -> Color(0xFF0F172A)
+        "GOLD" -> Color(0xFF3E2723)
+        "PASTEL" -> Color(0xFF4A1F3B)
+        else -> worldCardBg
+    }
+}
+

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -51,6 +52,8 @@ fun GameSwitch(
     val thumbSize = 24.dp
     val padding = 3.dp
 
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     val thumbOffset by animateDpAsState(
         targetValue = if (checked) trackWidth - thumbSize - padding else padding,
         animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing),
@@ -58,13 +61,13 @@ fun GameSwitch(
     )
 
     val trackBgColor by animateColorAsState(
-        targetValue = if (checked) QuestPurple else Color.White.copy(alpha = 0.15f),
+        targetValue = if (checked) primaryColor else Color.White.copy(alpha = 0.15f),
         animationSpec = tween(durationMillis = 240),
         label = "switch_track_color"
     )
 
     val trackBorderColor by animateColorAsState(
-        targetValue = if (checked) Color(0xFFB388FF) else Color.White.copy(alpha = 0.25f),
+        targetValue = if (checked) primaryColor.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.25f),
         animationSpec = tween(durationMillis = 240),
         label = "switch_border_color"
     )
@@ -97,7 +100,7 @@ fun GameSwitch(
             Icon(
                 imageVector = if (checked) Icons.Default.Check else Icons.Default.Close,
                 contentDescription = if (checked) "Enabled" else "Disabled",
-                tint = if (checked) QuestPurple else Color(0xFF78909C),
+                tint = if (checked) primaryColor else Color(0xFF78909C),
                 modifier = Modifier.size(14.dp)
             )
         }

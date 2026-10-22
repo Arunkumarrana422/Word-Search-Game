@@ -47,6 +47,7 @@ import com.example.ui.components.AppVectorIcons
 import com.example.ui.theme.CoinGold
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.StarYellow
+import com.example.ui.theme.glassBorder
 
 @Composable
 fun WorldSelectionScreen(
@@ -76,11 +77,14 @@ fun WorldSelectionScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            // Header
+            // Header Pill
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = Color.White.copy(alpha = 0.3f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -88,7 +92,7 @@ fun WorldSelectionScreen(
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier
-                            .size(44.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.15f))
                             .testTag("world_selection_back_button")
@@ -100,11 +104,11 @@ fun WorldSelectionScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(14.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     Text(
                         text = "10 Worlds",
-                        style = MaterialTheme.typography.headlineSmall.copy(
+                        style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White
                         )
@@ -116,7 +120,8 @@ fun WorldSelectionScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.Black.copy(alpha = 0.35f))
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                        .glassBorder(RoundedCornerShape(16.dp), borderColor = StarYellow.copy(alpha = 0.5f))
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -135,6 +140,8 @@ fun WorldSelectionScreen(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -168,6 +175,7 @@ private fun WorldCardItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .glassBorder(RoundedCornerShape(22.dp), borderColor = world.primaryColor)
             .clip(RoundedCornerShape(22.dp))
             .clickable(enabled = isUnlocked, onClick = onClick)
             .testTag("world_card_${world.id}"),

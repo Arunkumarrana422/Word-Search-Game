@@ -69,6 +69,8 @@ import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.StarYellow
 import com.example.ui.theme.SurfaceCardDark
+import com.example.ui.theme.glassBorder
+import com.example.ui.theme.glassCardColors
 
 @Composable
 fun HomeScreen(
@@ -119,35 +121,12 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Player Level Pill
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color.White.copy(alpha = 0.12f))
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = AppVectorIcons.Energy,
-                            contentDescription = null,
-                            tint = QuestCyan,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Lvl ${playerProfile.playerLevel}",
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = QuestCyan
-                            )
-                        )
-                    }
-
                     // Coins & Stars Pill
                     Row(
                         modifier = Modifier
                             .clip(RoundedCornerShape(20.dp))
                             .background(Color.White.copy(alpha = 0.12f))
+                            .glassBorder(RoundedCornerShape(20.dp), borderColor = CoinGold.copy(alpha = 0.6f))
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -233,11 +212,12 @@ fun HomeScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestPurple)
                         .clip(RoundedCornerShape(24.dp))
                         .clickable { onContinuePlaying(playerProfile.currentLevel) }
                         .testTag("home_continue_card"),
                     shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = QuestPurple),
+                    colors = glassCardColors(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
                 ) {
                     Column(
@@ -382,6 +362,7 @@ fun HomeScreen(
                     SmallHubButton(
                         text = "Daily Gift",
                         icon = AppVectorIcons.Gift,
+                        accentColor = CoinGold,
                         onClick = onDailyRewards,
                         testTag = "home_daily_rewards_button",
                         modifier = Modifier.weight(1f)
@@ -390,6 +371,7 @@ fun HomeScreen(
                     SmallHubButton(
                         text = "Badges",
                         icon = AppVectorIcons.Trophy,
+                        accentColor = StarYellow,
                         onClick = onAchievements,
                         testTag = "home_achievements_button",
                         modifier = Modifier.weight(1f)
@@ -398,6 +380,7 @@ fun HomeScreen(
                     SmallHubButton(
                         text = "Stats",
                         icon = AppVectorIcons.BarChart,
+                        accentColor = QuestCyan,
                         onClick = onStatistics,
                         testTag = "home_statistics_button",
                         modifier = Modifier.weight(1f)
@@ -424,11 +407,12 @@ private fun HomeActionCard(
 ) {
     Card(
         modifier = modifier
+            .glassBorder(RoundedCornerShape(20.dp), borderColor = accentColor)
             .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .testTag(testTag),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.9f)),
+        colors = glassCardColors(),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Column(
@@ -475,33 +459,39 @@ private fun HomeActionCard(
 private fun SmallHubButton(
     text: String,
     icon: ImageVector,
+    accentColor: Color,
     onClick: () -> Unit,
     testTag: String,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.1f))
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.Black.copy(alpha = 0.28f))
+            .glassBorder(RoundedCornerShape(24.dp), borderColor = accentColor.copy(alpha = 0.6f))
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp)
+            .padding(horizontal = 10.dp, vertical = 12.dp)
             .testTag(testTag),
         contentAlignment = Alignment.Center
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color.White,
+                tint = accentColor,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = Color.White
-                )
+                ),
+                maxLines = 1
             )
         }
     }

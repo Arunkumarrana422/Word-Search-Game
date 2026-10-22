@@ -58,6 +58,7 @@ import com.example.ui.theme.CoinGold
 import com.example.ui.theme.QuestGreen
 import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.StarYellow
+import com.example.ui.theme.glassBorder
 
 @Composable
 fun LevelMapScreen(
@@ -98,17 +99,20 @@ fun LevelMapScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // Header
+            // Header Pill
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = world.primaryColor.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
                         .testTag("level_map_back_button")
@@ -120,26 +124,27 @@ fun LevelMapScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     val sampleTier = com.example.data.model.DifficultyTier.fromLevel(world.startLevel)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = AppVectorIcons.getIconForWorld(world.id),
                             contentDescription = world.name,
                             tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = world.name,
-                            style = MaterialTheme.typography.titleLarge.copy(
+                            style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.ExtraBold,
                                 color = Color.White
-                            )
+                            ),
+                            maxLines = 1
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
@@ -152,12 +157,13 @@ fun LevelMapScreen(
                                     imageVector = AppVectorIcons.getIconForTier(sampleTier),
                                     contentDescription = sampleTier.tierName,
                                     tint = sampleTier.color,
-                                    modifier = Modifier.size(12.dp)
+                                    modifier = Modifier.size(10.dp)
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
+                                Spacer(modifier = Modifier.width(3.dp))
                                 Text(
                                     text = sampleTier.tierName,
                                     style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = sampleTier.color
                                     )
@@ -166,13 +172,16 @@ fun LevelMapScreen(
                         }
                     }
                     Text(
-                        text = "${world.subtitle} • ${sampleTier.gridSize}×${sampleTier.gridSize} Grids",
-                        style = MaterialTheme.typography.bodySmall.copy(
+                        text = "${world.subtitle}",
+                        style = MaterialTheme.typography.labelSmall.copy(
                             color = world.accentColor
-                        )
+                        ),
+                        maxLines = 1
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Grid of Level Nodes
             LazyVerticalGrid(

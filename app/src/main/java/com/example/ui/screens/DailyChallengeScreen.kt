@@ -48,6 +48,8 @@ import com.example.ui.theme.QuestPink
 import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.SurfaceCardDark
+import com.example.ui.theme.glassBorder
+import com.example.ui.theme.glassCardColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -85,15 +87,20 @@ fun DailyChallengeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
+            // Header Pill
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestPink.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
                         .testTag("daily_challenge_back_button")
@@ -105,11 +112,11 @@ fun DailyChallengeScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
                     text = "Daily Challenge",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
@@ -120,9 +127,10 @@ fun DailyChallengeScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .clip(RoundedCornerShape(26.dp))
+                    .glassBorder(RoundedCornerShape(26.dp), borderColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(26.dp),
-                colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.9f)),
+                colors = glassCardColors(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(
@@ -238,13 +246,16 @@ fun DailyChallengeScreen(
             // Action Button
             Button(
                 onClick = onStartDaily,
+                enabled = !isCompletedToday,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp)
                     .testTag("start_daily_puzzle_button"),
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isCompletedToday) QuestPurple else QuestGreen
+                    containerColor = if (isCompletedToday) Color.Gray else QuestGreen,
+                    disabledContainerColor = Color.White.copy(alpha = 0.15f),
+                    disabledContentColor = Color.White.copy(alpha = 0.6f)
                 )
             ) {
                 Icon(
@@ -253,7 +264,7 @@ fun DailyChallengeScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isCompletedToday) "REPLAY TODAY'S PUZZLE" else "PLAY DAILY PUZZLE",
+                    text = if (isCompletedToday) "COMPLETED - COME BACK TOMORROW" else "PLAY DAILY PUZZLE",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White

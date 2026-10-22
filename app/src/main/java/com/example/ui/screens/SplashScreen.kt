@@ -306,22 +306,24 @@ private fun FeaturePill(text: String, icon: ImageVector) {
     Box(
         modifier = Modifier
             .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
-            .padding(horizontal = 10.dp, vertical = 6.dp)
+            .padding(horizontal = 7.dp, vertical = 6.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(13.dp)
+                modifier = Modifier.size(12.dp)
             )
-            Spacer(modifier = Modifier.width(5.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = text,
+                maxLines = 1,
+                softWrap = false,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    fontSize = 11.sp
+                    fontSize = 10.sp
                 )
             )
         }

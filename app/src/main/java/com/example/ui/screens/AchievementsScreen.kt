@@ -44,11 +44,19 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.Achievement
 import com.example.ui.components.AmbientParticlesBackground
 import com.example.ui.components.AppVectorIcons
+import com.example.ui.components.RewardClaimDialog
 import com.example.ui.theme.CoinGold
 import com.example.ui.theme.QuestGreen
 import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.SurfaceCardDark
+import com.example.ui.theme.glassBorder
+import com.example.ui.theme.glassCardColors
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun AchievementsScreen(
@@ -57,6 +65,17 @@ fun AchievementsScreen(
     onBack: () -> Unit
 ) {
     BackHandler { onBack() }
+
+    var claimedTitle by remember { mutableStateOf<String?>(null) }
+    var claimedCoins by remember { mutableIntStateOf(0) }
+
+    if (claimedTitle != null) {
+        RewardClaimDialog(
+            title = claimedTitle!!,
+            coins = claimedCoins,
+            onDismiss = { claimedTitle = null }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -77,17 +96,20 @@ fun AchievementsScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            // Header
+            // Header Pill
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 14.dp),
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestGreen.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
                         .testTag("achievements_back_button")
@@ -99,16 +121,18 @@ fun AchievementsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
                     text = "Achievements",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
                 )
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -117,7 +141,11 @@ fun AchievementsScreen(
                 items(achievements) { ach ->
                     AchievementCardItem(
                         achievement = ach,
-                        onClaim = { onClaimReward(ach.id) }
+                        onClaim = {
+                            onClaimReward(ach.id)
+                            claimedTitle = ach.title
+                            claimedCoins = ach.rewardCoins
+                        }
                     )
                 }
                 item {
@@ -136,9 +164,10 @@ private fun AchievementCardItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .glassBorder(RoundedCornerShape(20.dp), borderColor = if (achievement.isCompleted) QuestGreen else MaterialTheme.colorScheme.primary)
             .testTag("achievement_card_${achievement.id}"),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.88f)),
+        colors = glassCardColors(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -259,6 +288,7 @@ private fun AchievementCardItem(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.Black.copy(alpha = 0.35f))
+                        .glassBorder(RoundedCornerShape(12.dp), borderColor = CoinGold.copy(alpha = 0.5f))
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {

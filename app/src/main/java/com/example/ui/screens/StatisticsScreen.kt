@@ -49,6 +49,8 @@ import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.StarYellow
 import com.example.ui.theme.SurfaceCardDark
+import com.example.ui.theme.glassBorder
+import com.example.ui.theme.glassCardColors
 
 @Composable
 fun StatisticsScreen(
@@ -78,17 +80,20 @@ fun StatisticsScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            // Header
+            // Header Pill
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestCyan.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.15f))
                         .testTag("statistics_back_button")
@@ -100,16 +105,18 @@ fun StatisticsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
                     text = "Player Statistics",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
                 )
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -160,9 +167,11 @@ fun StatisticsScreen(
 @Composable
 private fun StatCardItem(title: String, value: String, icon: ImageVector, accentColor: Color) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassBorder(RoundedCornerShape(18.dp), borderColor = accentColor),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceCardDark.copy(alpha = 0.88f)),
+        colors = glassCardColors(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(

@@ -12,6 +12,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.example.ui.components.DailyRewardDialog
 import com.example.ui.components.ResetProgressDialog
@@ -31,6 +33,12 @@ import androidx.activity.SystemBarStyle
 import com.example.ui.viewmodel.GameScreen
 import com.example.ui.viewmodel.GameViewModel
 
+import android.widget.Toast
+import android.app.Activity
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.ui.platform.LocalContext
+
 class MainActivity : ComponentActivity() {
 
     private val viewModel: GameViewModel by viewModels()
@@ -43,7 +51,8 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            WordQuestTheme {
+            val playerProfile by viewModel.playerProfile.collectAsState()
+            WordQuestTheme(themeKey = playerProfile.selectedBoardTheme) {
                 WordQuestApp(
                     viewModel = viewModel,
                     modifier = Modifier.fillMaxSize()
@@ -67,7 +76,21 @@ fun WordQuestApp(
     val showDailyRewards by viewModel.showDailyRewardDialog.collectAsState()
     val showResetDialog by viewModel.showResetConfirmDialog.collectAsState()
 
-    // Global back handling
+    val context = LocalContext.current
+    var backPressedTime by remember { mutableStateOf(0L) }
+
+    // Exit on double back press in Home screen
+    BackHandler(enabled = currentScreen == GameScreen.HOME) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - backPressedTime < 2000) {
+            (context as? Activity)?.finish()
+        } else {
+            backPressedTime = currentTime
+            Toast.makeText(context, "Press again to exit", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Global back handling for other screens
     BackHandler(enabled = currentScreen != GameScreen.SPLASH && currentScreen != GameScreen.HOME) {
         viewModel.navigateBack()
     }

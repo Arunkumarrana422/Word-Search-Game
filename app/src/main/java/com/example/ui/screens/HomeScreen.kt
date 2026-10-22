@@ -188,20 +188,46 @@ fun HomeScreen(
                         .scale(logoScale.value),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "WORD QUEST",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 4.sp,
-                            color = Color.White
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val title = "WORD QUEST"
+                        val colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            CoinGold,
+                            MaterialTheme.colorScheme.secondary,
+                            QuestPink,
+                            MaterialTheme.colorScheme.tertiary,
+                            QuestCyan,
+                            QuestGreen,
+                            Color(0xFFFF7043),
+                            Color(0xFFCE93D8)
                         )
-                    )
+                        var colorIndex = 0
+                        title.forEach { char ->
+                            if (char == ' ') {
+                                Spacer(modifier = Modifier.width(10.dp))
+                            } else {
+                                val color = colors[colorIndex % colors.size]
+                                colorIndex++
+                                Text(
+                                    text = char.toString(),
+                                    style = MaterialTheme.typography.headlineLarge.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 1.sp,
+                                        color = color
+                                    )
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = "WORD SEARCH PUZZLE",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp,
-                            color = CoinGold
+                            color = MaterialTheme.colorScheme.tertiary
                         )
                     )
                 }
@@ -214,7 +240,6 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestPurple)
                         .clip(RoundedCornerShape(24.dp))
-                        .clickable { onContinuePlaying(playerProfile.currentLevel) }
                         .testTag("home_continue_card"),
                     shape = RoundedCornerShape(24.dp),
                     colors = glassCardColors(),
@@ -267,7 +292,9 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .size(60.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White),
+                                    .background(Color.White)
+                                    .clickable { onContinuePlaying(playerProfile.currentLevel) }
+                                    .testTag("home_continue_play_button"),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(

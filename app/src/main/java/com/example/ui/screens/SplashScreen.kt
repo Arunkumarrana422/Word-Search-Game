@@ -125,7 +125,6 @@ fun SplashScreen(
                     listOf(QuestPurpleDeep, Color(0xFF281057), Color(0xFF0F0726))
                 )
             )
-            .clickable { onStartGame() } // Tap anywhere to start instantly
             .testTag("splash_screen_root")
     ) {
         AmbientParticlesBackground()

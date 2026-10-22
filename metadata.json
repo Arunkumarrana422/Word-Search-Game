@@ -1,0 +1,6 @@
+{
+  "name": "Word Quest",
+  "description": "Vibrant and addictive word search puzzle game with 500 progressive levels across 10 colorful worlds, smooth animations, audio & haptic feedback, daily challenges, and offline play.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

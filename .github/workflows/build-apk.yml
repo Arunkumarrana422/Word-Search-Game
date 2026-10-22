@@ -22,13 +22,16 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build Debug & Release APKs
-        run: gradle assembleDebug assembleRelease --no-daemon
+      - name: Decode Debug Keystore
+        run: |
+          base64 -d debug.keystore.base64 > debug.keystore
 
-      - name: Upload APK Artifacts
+      - name: Build Release APK
+        run: gradle assembleRelease --no-daemon
+
+      - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WordQuest-APKs
+          name: WordQuest-Release-APK
           path: |
-            app/build/outputs/apk/debug/app-debug.apk
             app/build/outputs/apk/release/*.apk

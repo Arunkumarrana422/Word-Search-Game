@@ -400,9 +400,14 @@ fun LevelCompleteDialog(
                             .testTag("level_complete_replay_button"),
                         shape = CircleShape
                     ) {
-                        Icon(imageVector = Icons.Default.Refresh, contentDescription = null, tint = Color.White)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Replay", color = Color.White)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Replay", color = Color.White, fontSize = 13.sp, maxLines = 1, softWrap = false)
+                        }
                     }
 
                     OutlinedButton(
@@ -413,9 +418,14 @@ fun LevelCompleteDialog(
                             .testTag("level_complete_map_button"),
                         shape = CircleShape
                     ) {
-                        Icon(imageVector = Icons.Default.Home, contentDescription = null, tint = Color.White)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Levels", color = Color.White)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(imageVector = Icons.Default.Home, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Levels", color = Color.White, fontSize = 13.sp, maxLines = 1, softWrap = false)
+                        }
                     }
                 }
             }

@@ -2,7 +2,6 @@ package com.example.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,10 +47,10 @@ fun TopGameBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(Color.Black.copy(alpha = 0.28f))
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -59,7 +58,7 @@ fun TopGameBar(
         IconButton(
             onClick = onBackClick,
             modifier = Modifier
-                .size(44.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.15f))
                 .testTag("top_bar_back_button")
@@ -67,46 +66,57 @@ fun TopGameBar(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
-                tint = Color.White
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
             )
         }
 
+        Spacer(modifier = Modifier.width(4.dp))
+
         // Center: Level, Difficulty Badge, and World / Timer
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.weight(1f)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text(
                     text = "LEVEL $levelNumber",
-                    style = MaterialTheme.typography.titleMedium.copy(
+                    style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp,
+                        letterSpacing = 0.5.sp,
                         color = Color.White
-                    )
+                    ),
+                    maxLines = 1
                 )
 
                 if (difficultyTier != null) {
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(difficultyTier.color.copy(alpha = 0.22f))
-                            .border(1.dp, difficultyTier.color.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .border(1.dp, difficultyTier.color.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = AppVectorIcons.getIconForTier(difficultyTier),
                                 contentDescription = null,
                                 tint = difficultyTier.color,
-                                modifier = Modifier.size(12.dp)
+                                modifier = Modifier.size(10.dp)
                             )
-                            Spacer(modifier = Modifier.width(3.dp))
+                            Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 text = "${difficultyTier.tierName} (${difficultyTier.gridSize}×${difficultyTier.gridSize})",
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 10.sp,
+                                    fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = difficultyTier.color
-                                )
+                                ),
+                                maxLines = 1
                             )
                         }
                     }
@@ -116,18 +126,18 @@ fun TopGameBar(
             if (remainingSeconds != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier.padding(top = 1.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Timer,
                         contentDescription = "Timer",
                         tint = if (remainingSeconds <= 15) Color(0xFFFF5252) else Color(0xFFFFD54F),
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(12.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     Text(
                         text = "${remainingSeconds / 60}:${(remainingSeconds % 60).toString().padStart(2, '0')}",
-                        style = MaterialTheme.typography.labelMedium.copy(
+                        style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = if (remainingSeconds <= 15) Color(0xFFFF5252) else Color(0xFFFFD54F)
                         )
@@ -137,11 +147,15 @@ fun TopGameBar(
                 Text(
                     text = worldName,
                     style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
                         color = Color.White.copy(alpha = 0.75f)
-                    )
+                    ),
+                    maxLines = 1
                 )
             }
         }
+
+        Spacer(modifier = Modifier.width(4.dp))
 
         // Right side: Coin pill and Pause Button
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -150,7 +164,7 @@ fun TopGameBar(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color.Black.copy(alpha = 0.35f))
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
                     .testTag("top_bar_coin_badge"),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -158,25 +172,26 @@ fun TopGameBar(
                     imageVector = AppVectorIcons.Coin,
                     contentDescription = "Coins",
                     tint = CoinGold,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(14.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(3.dp))
                 Text(
                     text = "$coins",
-                    style = MaterialTheme.typography.labelLarge.copy(
+                    style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = CoinGold
-                    )
+                    ),
+                    maxLines = 1
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
             // Pause Button
             IconButton(
                 onClick = onPauseClick,
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
                     .background(Color.White.copy(alpha = 0.15f))
                     .testTag("top_bar_pause_button")
@@ -184,7 +199,8 @@ fun TopGameBar(
                 Icon(
                     imageVector = Icons.Default.Pause,
                     contentDescription = "Pause",
-                    tint = Color.White
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }

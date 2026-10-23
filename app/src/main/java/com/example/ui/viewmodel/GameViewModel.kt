@@ -184,11 +184,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val world = WorldsRepository.ALL_WORLDS[2] // Cosmic Space for Daily
         _selectedWorld.value = world
 
-        val board = WordSearchGenerator.generateCustomBoard(
-            levelNumber = 999,
+        val board = WordSearchGenerator.generateDailyBoard(
             worldId = world.id,
-            gridSize = 7,
-            wordCount = 7,
             seed = seed
         )
         _boardData.value = board

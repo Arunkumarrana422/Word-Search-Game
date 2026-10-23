@@ -43,6 +43,86 @@ object WordSearchGenerator {
     }
 
     /**
+     * Generate a board specifically for Daily Challenge with 10 words, 10x10 grid,
+     * diagonal & reverse cross directions, and word overlapping for high difficulty.
+     */
+    fun generateDailyBoard(
+        worldId: Int,
+        seed: Long
+    ): BoardData {
+        val random = Random(seed)
+        val gridSize = 10
+        val targetCount = 10
+
+        // Get world-specific words and master bank words
+        val primaryPool = ThemedWordBank.getWordsForWorld(worldId)
+        val filtered = primaryPool.filter { it.length in 3..7 }
+            .distinct()
+            .shuffled(random)
+
+        val candidateWords = if (filtered.size >= targetCount + 5) {
+            filtered.take(targetCount + 5)
+        } else {
+            val masterPool = ThemedWordBank.getWordsForWorld(worldId)
+                .filter { it.length in 3..7 }
+                .distinct()
+                .shuffled(random)
+            (filtered + masterPool).distinct().take(targetCount + 5)
+        }
+
+        val grid = Array(gridSize) { Array(gridSize) { ' ' } }
+        val placedWords = mutableListOf<PlacedWord>()
+        var colorCounter = 0
+        val allowedDirections = DirectionType.entries // All 8 directions (Horizontal, Vertical, Diagonal, Reverse)
+
+        for (wordCandidate in candidateWords) {
+            if (placedWords.size >= targetCount) break
+
+            val word = wordCandidate.uppercase()
+            var placement = tryPlaceWord(grid, word, gridSize, allowedDirections, random, preferOverlap = true)
+            if (placement == null) {
+                // Fallback placement without strict overlap preference if grid gets crowded
+                placement = tryPlaceWord(grid, word, gridSize, allowedDirections, random, preferOverlap = false)
+            }
+            if (placement != null) {
+                placedWords.add(placement.copy(colorIndex = colorCounter++))
+            }
+        }
+
+        val targetLettersPool = placedWords.flatMap { it.word.toList() }.distinct()
+
+        for (r in 0 until gridSize) {
+            for (c in 0 until gridSize) {
+                if (grid[r][c] == ' ') {
+                    if (targetLettersPool.isNotEmpty() && random.nextFloat() < 0.45f) {
+                        grid[r][c] = targetLettersPool[random.nextInt(targetLettersPool.size)]
+                    } else {
+                        grid[r][c] = FREQUENT_LETTERS[random.nextInt(FREQUENT_LETTERS.length)]
+                    }
+                }
+            }
+        }
+
+        val verifiedPlacedWords = placedWords.filter { placed ->
+            val reconstructed = placed.path.map { grid[it.row][it.col] }.joinToString("")
+            reconstructed == placed.word
+        }
+
+        val immutableGrid = grid.map { it.toList() }
+        val targetWordList = verifiedPlacedWords.map { it.word }
+
+        return BoardData(
+            levelNumber = 999,
+            worldId = worldId,
+            gridSize = gridSize,
+            grid = immutableGrid,
+            targetWords = targetWordList,
+            placedWords = verifiedPlacedWords,
+            difficultyTier = DifficultyTier.EXPERT
+        )
+    }
+
+    /**
      * Generate a board for Daily Challenge or Timed Challenge.
      */
     fun generateCustomBoard(
@@ -52,19 +132,7 @@ object WordSearchGenerator {
         wordCount: Int,
         seed: Long
     ): BoardData {
-        val tier = DifficultyTier.fromLevel(levelNumber.coerceIn(1, 500))
-        return generateBoardInternal(
-            levelNumber = levelNumber,
-            worldId = worldId,
-            tier = tier,
-            gridSize = gridSize,
-            targetCount = wordCount,
-            allowedDirections = tier.directionsAllowed,
-            minWordLen = tier.minWordLength,
-            maxWordLen = minOf(tier.maxWordLength, gridSize),
-            decoyRatio = tier.decoyRatio,
-            seed = seed
-        )
+        return generateDailyBoard(worldId, seed)
     }
 
     private fun generateBoardInternal(

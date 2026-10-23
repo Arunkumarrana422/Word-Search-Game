@@ -156,4 +156,18 @@ class ExampleUnitTest {
         assertTrue("Higher level 3-star threshold should scale up beyond 20s", threshold3StarsLvl50 > threshold3StarsLvl1)
         assertTrue("Higher level 2-star threshold should scale up beyond 50s", threshold2StarsLvl50 > threshold2StarsLvl1)
     }
+
+    @Test
+    fun verify_dailyBoardGenerationWith10WordsAndTargetWordsNotEmpty() {
+        val dailyBoard = WordSearchGenerator.generateDailyBoard(worldId = 1, seed = 20261023L)
+        assertEquals(10, dailyBoard.gridSize)
+        assertTrue("Daily board must have target words placed", dailyBoard.targetWords.isNotEmpty())
+        assertEquals(10, dailyBoard.targetWords.size)
+        assertEquals(10, dailyBoard.placedWords.size)
+
+        for (placed in dailyBoard.placedWords) {
+            val wordFromGrid = placed.path.map { dailyBoard.grid[it.row][it.col] }.joinToString("")
+            assertEquals("Placed word ${placed.word} must match grid letters", placed.word, wordFromGrid)
+        }
+    }
 }

@@ -235,7 +235,7 @@ class GameRepository(private val context: Context) {
     fun recordDailyChallengeCompleted(): Int {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
         val profile = _playerProfile.value
-        val reward = 100
+        val reward = 25
         val newStreak = profile.dailyStreak + 1
         val updated = profile.copy(
             coins = profile.coins + reward,

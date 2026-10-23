@@ -214,7 +214,7 @@ fun DailyChallengeScreen(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "100 Coins",
+                                        text = "25 Coins",
                                         fontWeight = FontWeight.Bold,
                                         color = CoinGold
                                     )

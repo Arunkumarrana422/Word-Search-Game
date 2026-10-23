@@ -137,18 +137,16 @@ fun WordGridBoard(
                 val cellCorner = cellSize * 0.22f
                 val strokeThickness = cellSize * 0.76f
 
-                // 1. Draw cell tile backdrops
+                // 1. Draw cell tile backdrops as circles
                 for (r in 0 until gridSize) {
                     for (c in 0 until gridSize) {
-                        val left = c * cellSize + cellSize * 0.06f
-                        val top = r * cellSize + cellSize * 0.06f
-                        val tileSize = cellSize * 0.88f
+                        val center = Offset((c + 0.5f) * cellSize, (r + 0.5f) * cellSize)
+                        val radius = cellSize * 0.44f
 
-                        drawRoundRect(
+                        drawCircle(
                             color = Color(0x1FFFFFFF),
-                            topLeft = Offset(left, top),
-                            size = Size(tileSize, tileSize),
-                            cornerRadius = CornerRadius(cellCorner, cellCorner)
+                            radius = radius,
+                            center = center
                         )
                     }
                 }
@@ -223,7 +221,7 @@ fun WordGridBoard(
 }
 
 /**
- * Draws a rounded capsule connecting a sequence of grid cells.
+ * Draws circular highlights for each letter cell in the word path.
  */
 private fun DrawScope.drawWordCapsule(
     path: List<GridPos>,
@@ -233,24 +231,28 @@ private fun DrawScope.drawWordCapsule(
 ) {
     if (path.isEmpty()) return
 
-    if (path.size == 1) {
-        val center = Offset((path[0].col + 0.5f) * cellSize, (path[0].row + 0.5f) * cellSize)
+    // Draw connecting lines between consecutive cells for smooth flow
+    if (path.size > 1) {
+        for (i in 0 until path.size - 1) {
+            val p1 = Offset((path[i].col + 0.5f) * cellSize, (path[i].row + 0.5f) * cellSize)
+            val p2 = Offset((path[i + 1].col + 0.5f) * cellSize, (path[i + 1].row + 0.5f) * cellSize)
+            drawLine(
+                color = color,
+                start = p1,
+                end = p2,
+                strokeWidth = strokeThickness,
+                cap = StrokeCap.Round
+            )
+        }
+    }
+
+    // Draw a circle on each letter cell in the path
+    for (pos in path) {
+        val center = Offset((pos.col + 0.5f) * cellSize, (pos.row + 0.5f) * cellSize)
         drawCircle(
             color = color,
             radius = strokeThickness / 2,
             center = center
         )
-        return
     }
-
-    val start = Offset((path.first().col + 0.5f) * cellSize, (path.first().row + 0.5f) * cellSize)
-    val end = Offset((path.last().col + 0.5f) * cellSize, (path.last().row + 0.5f) * cellSize)
-
-    drawLine(
-        color = color,
-        start = start,
-        end = end,
-        strokeWidth = strokeThickness,
-        cap = StrokeCap.Round
-    )
 }

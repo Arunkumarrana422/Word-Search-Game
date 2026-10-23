@@ -81,16 +81,25 @@ object WordSearchGenerator {
     ): BoardData {
         val random = Random(seed)
 
-        // Sort & filter words by appropriate length for this level's difficulty, rotating by levelNumber to prevent repetition in consecutive levels
+        // Filter words by length and use strict non-overlapping sequential chunking per level to guarantee zero word repetition between consecutive levels
         val rawCandidates = ThemedWordBank.getWordsForWorld(worldId)
             .filter { it.length in minWordLen..maxWordLen }
-        val rotationOffset = if (rawCandidates.isNotEmpty()) ((levelNumber - 1) * 5) % rawCandidates.size else 0
-        val rotatedCandidates = if (rawCandidates.isNotEmpty()) {
-            rawCandidates.drop(rotationOffset) + rawCandidates.take(rotationOffset)
-        } else {
-            rawCandidates
+
+        val worldRandom = Random(worldId * 7919L)
+        val shuffledPool = if (rawCandidates.isNotEmpty()) rawCandidates.shuffled(worldRandom) else listOf("WORD")
+
+        val totalPoolSize = shuffledPool.size.coerceAtLeast(1)
+        val chunkSz = targetCount.coerceAtLeast(3)
+        val startIdx = ((levelNumber - 1) * chunkSz) % totalPoolSize
+
+        val candidateWords = mutableListOf<String>()
+        for (i in 0 until targetCount) {
+            val idx = (startIdx + i) % totalPoolSize
+            val word = shuffledPool[idx]
+            if (word !in candidateWords) {
+                candidateWords.add(word)
+            }
         }
-        val candidateWords = rotatedCandidates.shuffled(random)
 
         val grid = Array(gridSize) { Array(gridSize) { ' ' } }
         val placedWords = mutableListOf<PlacedWord>()

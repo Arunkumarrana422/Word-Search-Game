@@ -264,6 +264,7 @@ fun WordQuestApp(
                         theme = playerProfile.selectedBoardTheme,
                         reducedMotion = playerProfile.reducedMotion
                     )
+                    viewModel.playVolumePreview()
                 },
                 onReducedMotionToggle = { reduced ->
                     viewModel.updateSettings(

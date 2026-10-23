@@ -222,7 +222,7 @@ fun LevelCompleteDialog(
     hasNextLevel: Boolean,
     onNextLevel: () -> Unit,
     onReplay: () -> Unit,
-    onMap: () -> Unit
+    onHome: () -> Unit
 ) {
     val starScale1 = remember { Animatable(0f) }
     val starScale2 = remember { Animatable(0f) }
@@ -420,11 +420,11 @@ fun LevelCompleteDialog(
                     }
 
                     OutlinedButton(
-                        onClick = onMap,
+                        onClick = onHome,
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
-                            .testTag("level_complete_map_button"),
+                            .testTag("level_complete_home_button"),
                         shape = CircleShape
                     ) {
                         Row(
@@ -433,7 +433,7 @@ fun LevelCompleteDialog(
                         ) {
                             Icon(imageVector = Icons.Default.Home, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Levels", color = Color.White, fontSize = 13.sp, maxLines = 1, softWrap = false)
+                            Text("Home", color = Color.White, fontSize = 13.sp, maxLines = 1, softWrap = false)
                         }
                     }
                 }

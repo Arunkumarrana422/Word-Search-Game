@@ -128,7 +128,8 @@ private fun HintButtonItem(
                     else Color.Red.copy(alpha = 0.25f)
                 )
                 .padding(horizontal = 6.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = AppVectorIcons.Coin,

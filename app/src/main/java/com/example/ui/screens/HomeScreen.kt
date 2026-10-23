@@ -502,6 +502,7 @@ private fun SmallHubButton(
         contentAlignment = Alignment.Center
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {

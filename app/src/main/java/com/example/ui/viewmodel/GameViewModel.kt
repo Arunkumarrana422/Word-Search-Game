@@ -278,15 +278,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         timeTakenSeconds.value = duration
         stopTimer()
 
-        // Calculate stars: 3 stars if <= 60s and <= 1 hint; 2 stars if <= 120s; 1 star otherwise
+        // Calculate stars with time thresholds scaling dynamically by level number
+        val levelFactor = board.levelNumber.coerceIn(1, 500)
+        val threshold3Stars = 45 + (levelFactor * 2)
+        val threshold2Stars = 90 + (levelFactor * 3)
+
         val calculatedStars = when {
-            hintsUsedInCurrentGame == 0 && duration <= 60 -> 3
-            hintsUsedInCurrentGame <= 1 && duration <= 120 -> 2
+            hintsUsedInCurrentGame == 0 && duration <= threshold3Stars -> 3
+            hintsUsedInCurrentGame <= 1 && duration <= threshold2Stars -> 2
             else -> 1
         }
         starsEarned.value = calculatedStars
 
-        val earnedCoins = 30 + (calculatedStars * 15)
+        val localLevel = ((board.levelNumber - 1) % 50) + 1
+        val earnedCoins = 30 + ((200 - 30) * (localLevel - 1).coerceAtMost(49) / 49)
         val earnedXp = 50 + (calculatedStars * 20)
         coinsWon.value = earnedCoins
         xpWon.value = earnedXp
@@ -416,6 +421,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         theme: String,
         reducedMotion: Boolean
     ) {
+        soundManager.isSoundEnabled = sound
+        soundManager.masterVolume = volume
+        hapticsManager.isHapticsEnabled = haptics
         repository.updateSettings(sound, music, haptics, volume, theme, reducedMotion)
+    }
+
+    fun playVolumePreview() {
+        soundManager.playButtonClick()
     }
 }

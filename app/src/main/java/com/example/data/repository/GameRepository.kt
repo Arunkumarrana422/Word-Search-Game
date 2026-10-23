@@ -85,7 +85,8 @@ class GameRepository(private val context: Context) {
 
         val oldProfile = _playerProfile.value
         val newlyEarnedStars = if (isFirstCompletion) starsEarned else maxOf(0, starsEarned - currentStars)
-        val coinsReward = 30 + (starsEarned * 10)
+        val localLevel = ((levelNumber - 1) % 50) + 1
+        val coinsReward = 30 + ((200 - 30) * (localLevel - 1).coerceAtMost(49) / 49)
         val xpReward = 50 + (starsEarned * 15)
 
         val newTotalStars = oldProfile.totalStars + newlyEarnedStars

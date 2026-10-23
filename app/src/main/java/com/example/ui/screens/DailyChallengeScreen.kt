@@ -84,8 +84,7 @@ fun DailyChallengeScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header Pill
             Row(
@@ -107,153 +106,166 @@ fun DailyChallengeScreen(
                 )
             }
 
-            // Center Card
-            Card(
+            // Center area with weight to perfectly center card and button vertically
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(26.dp))
-                    .glassBorder(RoundedCornerShape(26.dp), borderColor = MaterialTheme.colorScheme.primary),
-                shape = RoundedCornerShape(26.dp),
-                colors = glassCardColors(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Trophy / Calendar Icon
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(CircleShape)
-                            .background(QuestPink.copy(alpha = 0.25f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isCompletedToday) AppVectorIcons.Trophy else AppVectorIcons.Calendar,
-                            contentDescription = null,
-                            tint = if (isCompletedToday) QuestGreen else QuestPink,
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = todayFormatted,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White.copy(alpha = 0.85f)
-                        )
-                    )
-
-                    Text(
-                        text = if (isCompletedToday) "Challenge Completed!" else "Today's Word Search",
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Black,
-                            color = if (isCompletedToday) QuestGreen else Color.White
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Streak Pill
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.12f))
-                            .padding(horizontal = 14.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = AppVectorIcons.Flame,
-                            contentDescription = null,
-                            tint = Color(0xFFFF9800),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "${profile.dailyStreak} Day Streak",
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFF9800)
-                            )
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Rewards Box
-                    Row(
+                    // Center Card
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .padding(14.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
+                            .clip(RoundedCornerShape(26.dp))
+                            .glassBorder(RoundedCornerShape(26.dp), borderColor = MaterialTheme.colorScheme.primary),
+                        shape = RoundedCornerShape(26.dp),
+                        colors = glassCardColors(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = AppVectorIcons.Coin,
-                                contentDescription = null,
-                                tint = CoinGold,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Trophy / Calendar Icon
+                            Box(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(CircleShape)
+                                    .background(QuestPink.copy(alpha = 0.25f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isCompletedToday) AppVectorIcons.Trophy else AppVectorIcons.Calendar,
+                                    contentDescription = null,
+                                    tint = if (isCompletedToday) QuestGreen else QuestPink,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             Text(
-                                text = "100 Coins",
-                                fontWeight = FontWeight.Bold,
-                                color = CoinGold
+                                text = todayFormatted,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White.copy(alpha = 0.85f)
+                                )
                             )
+
+                            Text(
+                                text = if (isCompletedToday) "Challenge Completed!" else "Today's Word Search",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    color = if (isCompletedToday) QuestGreen else Color.White
+                                )
+                            )
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            // Streak Pill
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.White.copy(alpha = 0.12f))
+                                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = AppVectorIcons.Flame,
+                                    contentDescription = null,
+                                    tint = Color(0xFFFF9800),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "${profile.dailyStreak} Day Streak",
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFFF9800)
+                                    )
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            // Rewards Box
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .padding(14.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = AppVectorIcons.Coin,
+                                        contentDescription = null,
+                                        tint = CoinGold,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "100 Coins",
+                                        fontWeight = FontWeight.Bold,
+                                        color = CoinGold
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = AppVectorIcons.Energy,
+                                        contentDescription = null,
+                                        tint = Color(0xFF00E5FF),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "+1 Streak",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF00E5FF)
+                                    )
+                                }
+                            }
                         }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = AppVectorIcons.Energy,
-                                contentDescription = null,
-                                tint = Color(0xFF00E5FF),
-                                modifier = Modifier.size(20.dp)
+                    }
+
+                    // Action Button (only shown if not completed today)
+                    if (!isCompletedToday) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = onStartDaily,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp)
+                                .testTag("start_daily_puzzle_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = QuestGreen
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = null
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "+1 Streak",
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF00E5FF)
+                                text = "PLAY DAILY PUZZLE",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White
+                                )
                             )
                         }
                     }
                 }
-            }
-
-            // Action Button
-            Button(
-                onClick = onStartDaily,
-                enabled = !isCompletedToday,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-                    .testTag("start_daily_puzzle_button"),
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isCompletedToday) Color.Gray else QuestGreen,
-                    disabledContainerColor = Color.White.copy(alpha = 0.15f),
-                    disabledContentColor = Color.White.copy(alpha = 0.6f)
-                )
-            ) {
-                Icon(
-                    imageVector = if (isCompletedToday) Icons.Default.Check else Icons.Default.PlayArrow,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (isCompletedToday) "COMPLETED - COME BACK TOMORROW" else "PLAY DAILY PUZZLE",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White
-                    )
-                )
             }
         }
     }

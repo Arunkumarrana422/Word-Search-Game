@@ -174,9 +174,9 @@ fun GameplayScreen(
                 hasNextLevel = currentBoard.levelNumber < 500,
                 onNextLevel = { viewModel.nextLevel() },
                 onReplay = { viewModel.restartCurrentLevel() },
-                onMap = {
+                onHome = {
                     viewModel.showLevelCompleteDialog.value = false
-                    viewModel.navigateTo(GameScreen.LEVEL_MAP)
+                    viewModel.navigateTo(GameScreen.HOME)
                 }
             )
         }

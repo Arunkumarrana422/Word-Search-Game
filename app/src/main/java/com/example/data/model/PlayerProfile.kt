@@ -6,7 +6,7 @@ package com.example.data.model
 data class PlayerProfile(
     val currentLevel: Int = 1,
     val highestUnlockedLevel: Int = 1,
-    val coins: Int = 250,
+    val coins: Int = 0,
     val totalStars: Int = 0,
     val xp: Int = 0,
     val playerLevel: Int = 1,

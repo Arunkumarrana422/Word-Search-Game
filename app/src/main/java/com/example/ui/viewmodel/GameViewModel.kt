@@ -85,6 +85,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val showLevelCompleteDialog = MutableStateFlow(false)
     val showDailyRewardDialog = MutableStateFlow(false)
     val showResetConfirmDialog = MutableStateFlow(false)
+    val showScratchCardDialog = MutableStateFlow(!repository.isScratchCardClaimed)
+    val welcomeScratchCoins = (1..50).random()
+
+    fun claimWelcomeScratchCard() {
+        if (!repository.isScratchCardClaimed) {
+            repository.claimWelcomeScratchCard(welcomeScratchCoins)
+            soundManager.playCoinCollect()
+            soundManager.playLevelComplete()
+            hapticsManager.vibrateLevelComplete()
+        }
+        showScratchCardDialog.value = false
+    }
 
     // Completion stats
     val starsEarned = MutableStateFlow(3)

@@ -31,7 +31,7 @@ class GameRepository(private val context: Context) {
         return PlayerProfile(
             currentLevel = prefs.getInt("current_level", 1),
             highestUnlockedLevel = prefs.getInt("highest_unlocked_level", 1),
-            coins = prefs.getInt("coins", 250),
+            coins = prefs.getInt("coins", 0),
             totalStars = prefs.getInt("total_stars", 0),
             xp = prefs.getInt("xp", 0),
             playerLevel = prefs.getInt("player_level", 1),
@@ -252,6 +252,16 @@ class GameRepository(private val context: Context) {
         ))
         updateAchievementProgress("streak_3", newDailyCount)
         return reward
+    }
+
+    val isScratchCardClaimed: Boolean
+        get() = prefs.getBoolean("scratch_card_claimed", false)
+
+    fun claimWelcomeScratchCard(rewardAmount: Int) {
+        val profile = _playerProfile.value
+        val updated = profile.copy(coins = profile.coins + rewardAmount)
+        prefs.edit().putBoolean("scratch_card_claimed", true).apply()
+        savePlayerProfile(updated)
     }
 
     fun resetAllProgress() {

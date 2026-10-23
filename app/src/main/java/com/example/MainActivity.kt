@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.example.ui.components.DailyRewardDialog
 import com.example.ui.components.ResetProgressDialog
+import com.example.ui.components.ScratchCardDialog
 import com.example.ui.screens.AchievementsScreen
 import com.example.ui.screens.DailyChallengeScreen
 import com.example.ui.screens.GameplayScreen
@@ -75,6 +76,7 @@ fun WordQuestApp(
 
     val showDailyRewards by viewModel.showDailyRewardDialog.collectAsState()
     val showResetDialog by viewModel.showResetConfirmDialog.collectAsState()
+    val showScratchCard by viewModel.showScratchCardDialog.collectAsState()
 
     val context = LocalContext.current
     var backPressedTime by remember { mutableStateOf(0L) }
@@ -332,6 +334,16 @@ fun WordQuestApp(
             },
             onDismiss = {
                 viewModel.showResetConfirmDialog.value = false
+            }
+        )
+    }
+
+    // Welcome Scratch Card Dialog (Only shown on HOME screen)
+    if (showScratchCard && currentScreen == GameScreen.HOME) {
+        ScratchCardDialog(
+            rewardCoins = viewModel.welcomeScratchCoins,
+            onClaim = {
+                viewModel.claimWelcomeScratchCard()
             }
         )
     }

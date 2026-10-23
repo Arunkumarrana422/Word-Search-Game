@@ -13,12 +13,23 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import kotlin.random.Random
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.Arrangement
@@ -1028,6 +1039,295 @@ fun ResetProgressDialog(
                         Text("Reset", fontWeight = FontWeight.Bold)
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Interactive Welcome Scratch Card Dialog for new users (1 to 50 coins).
+ * Centered on screen, with sound effects, drag-to-scratch foil, and celebration.
+ */
+@Composable
+fun ScratchCardDialog(
+    rewardCoins: Int,
+    onClaim: () -> Unit
+) {
+    var isRevealed by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var scratchedPaths by remember { androidx.compose.runtime.mutableStateOf<List<Path>>(emptyList()) }
+    var currentPath by remember { androidx.compose.runtime.mutableStateOf<Path?>(null) }
+    var totalDragDistance by remember { mutableFloatStateOf(0f) }
+
+    val soundManager = remember { com.example.audio.SoundManager() }
+
+    val scaleAnim = remember { Animatable(0.3f) }
+    val rotateAnim = remember { Animatable(-10f) }
+
+    val infinitePulse = rememberInfiniteTransition(label = "scratch_btn_pulse")
+    val buttonScale by infinitePulse.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "btn_scale"
+    )
+
+    LaunchedEffect(Unit) {
+        scaleAnim.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow))
+        rotateAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+    }
+
+    LaunchedEffect(isRevealed) {
+        if (isRevealed) {
+            try {
+                soundManager.playCoinCollect()
+                soundManager.playLevelComplete()
+            } catch (_: Exception) {}
+        }
+    }
+
+    Dialog(
+        onDismissRequest = {},
+        properties = androidx.compose.ui.window.DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .scale(scaleAnim.value)
+                .rotate(rotateAnim.value),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .glassBorder(RoundedCornerShape(32.dp), borderColor = CoinGold)
+                    .testTag("scratch_card_dialog"),
+                shape = RoundedCornerShape(32.dp),
+                colors = dialogCardColors(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Header Badge
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(StarYellow, CoinGold, Color(0xFFFF9100))
+                                )
+                            )
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "✨ WELCOME GIFT SCRATCH CARD ✨",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.2.sp,
+                                color = Color.Black
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = if (isRevealed) "CONGRATULATIONS!" else "Scratch to Win Coins!",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Text(
+                        text = if (isRevealed) "You earned Welcome Bonus coins!" else "Rub your finger on the foil below (1 to 50 Coins)",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color.White.copy(alpha = 0.75f),
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                    )
+
+                    // Scratch Surface Box
+                    Box(
+                        modifier = Modifier
+                            .size(width = 260.dp, height = 150.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .border(2.5.dp, CoinGold, RoundedCornerShape(20.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Underlying Revealed Reward Content
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.radialGradient(
+                                        listOf(Color(0xFF2E1065), Color(0xFF0F172A))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            SunburstRaysCanvas(
+                                modifier = Modifier.fillMaxSize(),
+                                color = CoinGold.copy(alpha = 0.35f)
+                            )
+
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = AppVectorIcons.Coin,
+                                    contentDescription = null,
+                                    tint = CoinGold,
+                                    modifier = Modifier.size(42.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "+$rewardCoins COINS",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Black,
+                                        color = CoinGold
+                                    )
+                                )
+                            }
+                        }
+
+                        // Overhead Scratchable Metallic Foil
+                        if (!isRevealed) {
+                            Canvas(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .graphicsLayer { alpha = 0.99f }
+                                    .pointerInput(Unit) {
+                                        detectDragGestures(
+                                            onDragStart = { offset ->
+                                                val p = Path().apply { moveTo(offset.x, offset.y) }
+                                                currentPath = p
+                                                try { soundManager.playLetterSelect() } catch (_: Exception) {}
+                                            },
+                                            onDrag = { change, _ ->
+                                                change.consume()
+                                                currentPath?.lineTo(change.position.x, change.position.y)
+                                                totalDragDistance += 15f
+                                                if (totalDragDistance > 450f && !isRevealed) {
+                                                    isRevealed = true
+                                                }
+                                            },
+                                            onDragEnd = {
+                                                currentPath?.let { scratchedPaths = scratchedPaths + it }
+                                                currentPath = null
+                                            }
+                                        )
+                                    }
+                            ) {
+                                // Draw metallic silver/gold foil
+                                drawRect(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(0xFFE0E0E0),
+                                            Color(0xFFB0BEC5),
+                                            Color(0xFFCFD8DC),
+                                            Color(0xFF90A4AE)
+                                        )
+                                    )
+                                )
+
+                                // Scratch path eraser strokes
+                                drawIntoCanvas { canvas ->
+                                    val paint = Paint().apply {
+                                        blendMode = BlendMode.Clear
+                                        style = PaintingStyle.Stroke
+                                        strokeWidth = 54f
+                                        strokeCap = StrokeCap.Round
+                                        strokeJoin = StrokeJoin.Round
+                                    }
+                                    for (path in scratchedPaths) {
+                                        canvas.drawPath(path, paint)
+                                    }
+                                    currentPath?.let { canvas.drawPath(it, paint) }
+                                }
+                            }
+
+                            // Foil text prompt overlay
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Transparent),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "SCRATCH HERE ✍️",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Black,
+                                        color = Color(0xFF263238),
+                                        letterSpacing = 1.sp
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    if (isRevealed) {
+                        // Claim Button
+                        Button(
+                            onClick = onClaim,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .scale(buttonScale)
+                                .testTag("claim_scratch_card_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = QuestGreen)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "CLAIM MY COINS!",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color.White,
+                                        letterSpacing = 1.sp
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        // Quick Reveal Button
+                        TextButton(
+                            onClick = { isRevealed = true },
+                            modifier = Modifier.testTag("quick_reveal_scratch_button")
+                        ) {
+                            Text(
+                                text = "⚡ Quick Reveal",
+                                color = CoinGold,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (isRevealed) {
+                ConfettiExplosionCanvas(
+                    modifier = Modifier.size(340.dp)
+                )
             }
         }
     }

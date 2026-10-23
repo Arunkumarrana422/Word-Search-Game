@@ -106,27 +106,11 @@ fun LevelMapScreen(
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color.Black.copy(alpha = 0.28f))
                     .glassBorder(RoundedCornerShape(24.dp), borderColor = world.primaryColor.copy(alpha = 0.5f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .testTag("level_map_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     val sampleTier = com.example.data.model.DifficultyTier.fromLevel(world.startLevel)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(

@@ -103,26 +103,10 @@ fun AchievementsScreen(
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color.Black.copy(alpha = 0.28f))
                     .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestGreen.copy(alpha = 0.5f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .testTag("achievements_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
                 Text(
                     text = "Achievements",
                     style = MaterialTheme.typography.titleLarge.copy(

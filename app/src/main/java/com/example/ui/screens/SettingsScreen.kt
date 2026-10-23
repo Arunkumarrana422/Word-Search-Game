@@ -95,27 +95,11 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color.Black.copy(alpha = 0.28f))
-                    .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestPurple.copy(alpha = 0.5f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .testTag("settings_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
                 Text(
                     text = "Settings",
                     style = MaterialTheme.typography.titleLarge.copy(
@@ -171,7 +155,7 @@ fun SettingsScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .glassBorder(RoundedCornerShape(18.dp), borderColor = QuestPurple),
+                            .glassBorder(RoundedCornerShape(18.dp), borderColor = MaterialTheme.colorScheme.primary),
                         shape = RoundedCornerShape(18.dp),
                         colors = glassCardColors()
                     ) {
@@ -187,7 +171,7 @@ fun SettingsScreen(
                                 )
                                 Text(
                                     text = "${(profile.soundVolume * 100).toInt()}%",
-                                    color = QuestPurple,
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -195,8 +179,8 @@ fun SettingsScreen(
                                 value = profile.soundVolume,
                                 onValueChange = onVolumeChange,
                                 colors = SliderDefaults.colors(
-                                    thumbColor = QuestPurple,
-                                    activeTrackColor = QuestPurple
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary
                                 )
                             )
                         }
@@ -212,7 +196,7 @@ fun SettingsScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .glassBorder(RoundedCornerShape(18.dp), borderColor = QuestPurple)
+                            .glassBorder(RoundedCornerShape(18.dp), borderColor = MaterialTheme.colorScheme.primary)
                             .clip(RoundedCornerShape(18.dp))
                             .clickable(onClick = onOpenThemeSelection)
                             .testTag("settings_theme_button"),
@@ -234,7 +218,7 @@ fun SettingsScreen(
                                     Text("Current: ${profile.selectedBoardTheme}", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.7f))
                                 }
                             }
-                            Text("Change >", color = QuestPurple, fontWeight = FontWeight.Bold)
+                            Text("Change >", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -325,7 +309,7 @@ private fun SettingsToggleCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .glassBorder(RoundedCornerShape(18.dp), borderColor = QuestPurple),
+            .glassBorder(RoundedCornerShape(18.dp), borderColor = MaterialTheme.colorScheme.primary),
         shape = RoundedCornerShape(18.dp),
         colors = glassCardColors()
     ) {

@@ -45,6 +45,7 @@ import com.example.ui.theme.QuestGreen
 import com.example.ui.theme.QuestPurple
 import com.example.ui.theme.QuestPurpleDeep
 import com.example.ui.theme.SurfaceCardDark
+import com.example.ui.theme.glassBorder
 
 @Composable
 fun OnboardingScreen(
@@ -72,31 +73,20 @@ fun OnboardingScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            // Header
+            // Header Pill
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.28f))
+                    .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestGreen.copy(alpha = 0.5f))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .testTag("onboarding_back_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
                 Text(
                     text = "How to Play",
-                    style = MaterialTheme.typography.headlineSmall.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )

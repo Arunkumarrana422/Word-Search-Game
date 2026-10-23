@@ -84,36 +84,17 @@ fun WorldSelectionScreen(
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color.Black.copy(alpha = 0.28f))
                     .glassBorder(RoundedCornerShape(24.dp), borderColor = Color.White.copy(alpha = 0.3f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.15f))
-                            .testTag("world_selection_back_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        text = "10 Worlds",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
-                        )
+                Text(
+                    text = "10 Worlds",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
                     )
-                }
+                )
 
                 // Total Stars badge
                 Row(

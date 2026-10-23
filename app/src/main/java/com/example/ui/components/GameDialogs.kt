@@ -83,7 +83,7 @@ fun PauseDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .glassBorder(RoundedCornerShape(24.dp), borderColor = QuestPurple)
+                .glassBorder(RoundedCornerShape(24.dp), borderColor = MaterialTheme.colorScheme.primary)
                 .testTag("pause_dialog"),
             shape = RoundedCornerShape(24.dp),
             colors = dialogCardColors(),
@@ -112,7 +112,7 @@ fun PauseDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.08f))
-                        .glassBorder(RoundedCornerShape(12.dp), borderColor = QuestPurple.copy(alpha = 0.5f))
+                        .glassBorder(RoundedCornerShape(12.dp), borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -140,7 +140,7 @@ fun PauseDialog(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.08f))
-                        .glassBorder(RoundedCornerShape(12.dp), borderColor = QuestPurple.copy(alpha = 0.5f))
+                        .glassBorder(RoundedCornerShape(12.dp), borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -170,7 +170,7 @@ fun PauseDialog(
                         .height(50.dp)
                         .testTag("pause_resume_button"),
                     shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = QuestPurple)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))

@@ -92,11 +92,11 @@ enum class DifficultyTier(
         tierName = "Easy",
         gridSize = 5,
         minWords = 4,
-        maxWords = 5,
+        maxWords = 6,
         minWordLength = 3,
         maxWordLength = 5,
         directionsAllowed = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN, DirectionType.DIAGONAL_DOWN_RIGHT),
-        decoyRatio = 0.05f,
+        decoyRatio = 0.08f,
         startLevel = 11,
         endLevel = 20,
         color = Color(0xFF81C784)
@@ -104,8 +104,8 @@ enum class DifficultyTier(
     NORMAL(
         tierName = "Normal",
         gridSize = 6,
-        minWords = 4,
-        maxWords = 6,
+        minWords = 5,
+        maxWords = 8,
         minWordLength = 4,
         maxWordLength = 6,
         directionsAllowed = listOf(
@@ -114,7 +114,7 @@ enum class DifficultyTier(
             DirectionType.DIAGONAL_DOWN_RIGHT,
             DirectionType.HORIZONTAL_BACKWARD
         ),
-        decoyRatio = 0.15f,
+        decoyRatio = 0.18f,
         startLevel = 21,
         endLevel = 50,
         color = Color(0xFF26D9F2)
@@ -122,8 +122,8 @@ enum class DifficultyTier(
     MEDIUM(
         tierName = "Medium",
         gridSize = 7,
-        minWords = 5,
-        maxWords = 8,
+        minWords = 7,
+        maxWords = 10,
         minWordLength = 4,
         maxWordLength = 7,
         directionsAllowed = listOf(
@@ -134,7 +134,7 @@ enum class DifficultyTier(
             DirectionType.HORIZONTAL_BACKWARD,
             DirectionType.VERTICAL_UP
         ),
-        decoyRatio = 0.25f,
+        decoyRatio = 0.28f,
         startLevel = 51,
         endLevel = 100,
         color = Color(0xFFFFD54F)
@@ -142,12 +142,12 @@ enum class DifficultyTier(
     HARD(
         tierName = "Hard",
         gridSize = 8,
-        minWords = 7,
+        minWords = 8,
         maxWords = 10,
         minWordLength = 5,
         maxWordLength = 8,
         directionsAllowed = DirectionType.values().toList(),
-        decoyRatio = 0.35f,
+        decoyRatio = 0.38f,
         startLevel = 101,
         endLevel = 200,
         color = Color(0xFFFF7043)
@@ -156,11 +156,11 @@ enum class DifficultyTier(
         tierName = "Expert",
         gridSize = 9,
         minWords = 8,
-        maxWords = 12,
+        maxWords = 10,
         minWordLength = 5,
         maxWordLength = 9,
         directionsAllowed = DirectionType.values().toList(),
-        decoyRatio = 0.45f,
+        decoyRatio = 0.48f,
         startLevel = 201,
         endLevel = 350,
         color = Color(0xFFE040FB)
@@ -168,12 +168,12 @@ enum class DifficultyTier(
     MASTER(
         tierName = "Master",
         gridSize = 10,
-        minWords = 10,
-        maxWords = 14,
+        minWords = 8,
+        maxWords = 10,
         minWordLength = 5,
         maxWordLength = 10,
         directionsAllowed = DirectionType.values().toList(),
-        decoyRatio = 0.55f,
+        decoyRatio = 0.58f,
         startLevel = 351,
         endLevel = 500,
         color = Color(0xFFFFD700)

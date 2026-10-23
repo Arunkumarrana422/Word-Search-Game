@@ -116,4 +116,17 @@ class ExampleUnitTest {
         val pathLeft = WordSearchGenerator.calculateSelectionPath(GridPos(1, 4), GridPos(1, 2), 6)
         assertEquals(listOf(GridPos(1, 4), GridPos(1, 3), GridPos(1, 2)), pathLeft)
     }
+
+    @Test
+    fun verify_zeroWordRepetitionAcrossLevels() {
+        val seenWords = mutableSetOf<String>()
+        // Check levels 1 through 20 for zero word overlap
+        for (lvl in 1..20) {
+            val board = WordSearchGenerator.generateLevel(lvl)
+            for (word in board.targetWords) {
+                assertTrue("Word '$word' in level $lvl was already used in a previous level!", word !in seenWords)
+                seenWords.add(word)
+            }
+        }
+    }
 }

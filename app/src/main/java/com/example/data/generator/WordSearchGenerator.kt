@@ -81,53 +81,31 @@ object WordSearchGenerator {
     ): BoardData {
         val random = Random(seed)
 
-        // Filter words by length and use strict non-overlapping sequential chunking per level to guarantee zero word repetition between consecutive levels
-        val rawCandidates = ThemedWordBank.getWordsForWorld(worldId)
-            .filter { it.length in minWordLen..maxWordLen }
-
-        val worldRandom = Random(worldId * 7919L)
-        val shuffledPool = if (rawCandidates.isNotEmpty()) rawCandidates.shuffled(worldRandom) else listOf("WORD")
-
-        val totalPoolSize = shuffledPool.size.coerceAtLeast(1)
-        val chunkSz = targetCount.coerceAtLeast(3)
-        val startIdx = ((levelNumber - 1) * chunkSz) % totalPoolSize
-
-        val candidateWords = mutableListOf<String>()
-        for (i in 0 until targetCount) {
-            val idx = (startIdx + i) % totalPoolSize
-            val word = shuffledPool[idx]
-            if (word !in candidateWords) {
-                candidateWords.add(word)
-            }
-        }
+        // Retrieve 100% globally unique words allocated for this specific level (never used in any other level)
+        val candidateWords = getUniqueWordsForLevel(
+            levelNumber = levelNumber,
+            worldId = worldId,
+            minWordLen = minWordLen,
+            maxWordLen = maxWordLen,
+            targetCount = targetCount
+        )
 
         val grid = Array(gridSize) { Array(gridSize) { ' ' } }
         val placedWords = mutableListOf<PlacedWord>()
         var colorCounter = 0
+        val preferOverlap = levelNumber >= 2 || tier != DifficultyTier.NOVICE
 
         for (wordCandidate in candidateWords) {
             if (placedWords.size >= targetCount) break
 
             val word = wordCandidate.uppercase()
-            val placement = tryPlaceWord(grid, word, gridSize, allowedDirections, random)
+            var placement = tryPlaceWord(grid, word, gridSize, allowedDirections, random, preferOverlap)
+            if (placement == null && preferOverlap) {
+                // Fallback attempt without overlap preference if grid is crowded
+                placement = tryPlaceWord(grid, word, gridSize, allowedDirections, random, preferOverlap = false)
+            }
             if (placement != null) {
                 placedWords.add(placement.copy(colorIndex = colorCounter++))
-            }
-        }
-
-        // If candidates within strict range didn't meet targetCount, try fallback length range
-        if (placedWords.size < tier.minWords) {
-            val fallbackCandidates = ThemedWordBank.getWordsForWorld(worldId)
-                .filter { it.length in 3..gridSize && it !in placedWords.map { p -> p.word } }
-                .shuffled(random)
-
-            for (wordCandidate in fallbackCandidates) {
-                if (placedWords.size >= targetCount) break
-                val word = wordCandidate.uppercase()
-                val placement = tryPlaceWord(grid, word, gridSize, allowedDirections, random)
-                if (placement != null) {
-                    placedWords.add(placement.copy(colorIndex = colorCounter++))
-                }
             }
         }
 
@@ -168,12 +146,79 @@ object WordSearchGenerator {
         )
     }
 
+    private val levelAllocatedWordsCache = mutableMapOf<Int, List<String>>()
+    private val globalUsedWordsSet = mutableSetOf<String>()
+    private var highestCachedLevel = 0
+
+    @Synchronized
+    private fun getUniqueWordsForLevel(
+        levelNumber: Int,
+        worldId: Int,
+        minWordLen: Int,
+        maxWordLen: Int,
+        targetCount: Int
+    ): List<String> {
+        val cached = levelAllocatedWordsCache[levelNumber]
+        if (cached != null) return cached
+
+        // Progressively populate up to levelNumber
+        for (lvl in (highestCachedLevel + 1)..levelNumber) {
+            val lvlWorld = WorldsRepository.getWorldForLevel(lvl)
+            val lvlTier = DifficultyTier.fromLevel(lvl)
+            val lvlMinLen = lvlTier.minWordLength
+            val lvlMaxLen = minOf(lvlTier.maxWordLength, lvlTier.gridSize)
+            
+            val tierSpan = (lvlTier.endLevel - lvlTier.startLevel).coerceAtLeast(1)
+            val progressInTier = ((lvl - lvlTier.startLevel).toFloat() / tierSpan).coerceIn(0f, 1f)
+            val lvlTargetCount = (lvlTier.minWords + progressInTier * (lvlTier.maxWords - lvlTier.minWords)).toInt()
+                .coerceIn(lvlTier.minWords, lvlTier.maxWords)
+
+            val worldPool = ThemedWordBank.getWordsForWorld(lvlWorld.id)
+            val lvlSeed = (lvl.toLong() * 9301L + lvlWorld.id.toLong() * 49297L)
+            val poolRandom = Random(lvlWorld.id * 7919L + lvl.toLong() * 31L + lvlSeed)
+
+            val candidates = worldPool.filter {
+                it.length in lvlMinLen..lvlMaxLen && it !in globalUsedWordsSet
+            }
+
+            val countToPick = lvlTargetCount + 3
+            val chosen = mutableListOf<String>()
+            
+            if (candidates.size >= countToPick) {
+                chosen.addAll(candidates.shuffled(poolRandom).take(countToPick))
+            } else {
+                chosen.addAll(candidates)
+                val masterFallback = ThemedWordBank.getWordsForWorld(lvlWorld.id).filter {
+                    it !in globalUsedWordsSet && it !in chosen
+                }
+                val needed = countToPick - chosen.size
+                chosen.addAll(masterFallback.shuffled(poolRandom).take(needed))
+            }
+
+            globalUsedWordsSet.addAll(chosen)
+            levelAllocatedWordsCache[lvl] = chosen
+        }
+
+        highestCachedLevel = maxOf(highestCachedLevel, levelNumber)
+        return levelAllocatedWordsCache[levelNumber] ?: emptyList()
+    }
+
+    private data class PlacementCandidate(
+        val start: GridPos,
+        val dir: DirectionType,
+        val endRow: Int,
+        val endCol: Int,
+        val path: List<GridPos>,
+        val overlapCount: Int
+    )
+
     private fun tryPlaceWord(
         grid: Array<Array<Char>>,
         word: String,
         gridSize: Int,
         allowedDirections: List<DirectionType>,
-        random: Random
+        random: Random,
+        preferOverlap: Boolean = false
     ): PlacedWord? {
         val directions = allowedDirections.shuffled(random)
         val allPositions = mutableListOf<GridPos>()
@@ -183,6 +228,7 @@ object WordSearchGenerator {
             }
         }
         val shuffledPositions = allPositions.shuffled(random)
+        val validCandidates = mutableListOf<PlacementCandidate>()
 
         for (start in shuffledPositions) {
             for (dir in directions) {
@@ -191,37 +237,60 @@ object WordSearchGenerator {
 
                 if (endR in 0 until gridSize && endC in 0 until gridSize) {
                     var canPlace = true
+                    var overlapCount = 0
                     val path = mutableListOf<GridPos>()
 
                     for (i in word.indices) {
                         val currR = start.row + dir.dRow * i
                         val currC = start.col + dir.dCol * i
                         val cellChar = grid[currR][currC]
-                        if (cellChar != ' ' && cellChar != word[i]) {
-                            canPlace = false
-                            break
+                        if (cellChar != ' ') {
+                            if (cellChar == word[i]) {
+                                overlapCount++
+                            } else {
+                                canPlace = false
+                                break
+                            }
                         }
                         path.add(GridPos(currR, currC))
                     }
 
                     if (canPlace) {
-                        // Apply word to grid
-                        for (i in word.indices) {
-                            grid[path[i].row][path[i].col] = word[i]
-                        }
-                        return PlacedWord(
-                            word = word,
-                            startRow = start.row,
-                            startCol = start.col,
-                            endRow = endR,
-                            endCol = endC,
-                            path = path
+                        validCandidates.add(
+                            PlacementCandidate(start, dir, endR, endC, path, overlapCount)
                         )
                     }
                 }
             }
         }
-        return null
+
+        if (validCandidates.isEmpty()) return null
+
+        val selected = if (preferOverlap) {
+            val overlapping = validCandidates.filter { it.overlapCount > 0 }
+            if (overlapping.isNotEmpty()) {
+                val maxOverlap = overlapping.maxOf { it.overlapCount }
+                overlapping.filter { it.overlapCount == maxOverlap }.random(random)
+            } else {
+                validCandidates.random(random)
+            }
+        } else {
+            validCandidates.random(random)
+        }
+
+        // Apply word to grid
+        for (i in word.indices) {
+            grid[selected.path[i].row][selected.path[i].col] = word[i]
+        }
+
+        return PlacedWord(
+            word = word,
+            startRow = selected.start.row,
+            startCol = selected.start.col,
+            endRow = selected.endRow,
+            endCol = selected.endCol,
+            path = selected.path
+        )
     }
 
     /**

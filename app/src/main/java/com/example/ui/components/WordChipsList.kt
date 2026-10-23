@@ -139,7 +139,7 @@ private fun WordChipItem(
     )
 
     val textColor by animateColorAsState(
-        targetValue = if (isFound) Color.White.copy(alpha = 0.65f) else Color.White,
+        targetValue = if (isFound) Color.White else Color.White.copy(alpha = 0.9f),
         animationSpec = tween(300),
         label = "chip_text"
     )
@@ -175,8 +175,8 @@ private fun WordChipItem(
             Text(
                 text = word,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = if (isFound) FontWeight.Normal else FontWeight.Bold,
-                    textDecoration = if (isFound) TextDecoration.LineThrough else TextDecoration.None,
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.None,
                     letterSpacing = 1.sp,
                     color = textColor
                 )

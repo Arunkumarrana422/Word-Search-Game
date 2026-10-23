@@ -290,10 +290,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         timeTakenSeconds.value = duration
         stopTimer()
 
-        // Calculate stars with time thresholds scaling dynamically by level number
-        val levelFactor = board.levelNumber.coerceIn(1, 500)
-        val threshold3Stars = 45 + (levelFactor * 2)
-        val threshold2Stars = 90 + (levelFactor * 3)
+        // Calculate stars with time thresholds scaling dynamically by difficulty & level number
+        // Base thresholds for Level 1: <= 20s = 3 Stars, <= 50s = 2 Stars, > 50s = 1 Star.
+        // As level & board complexity (target words count and grid size) increase, thresholds scale up proportionally.
+        val base3StarSeconds = 20
+        val base2StarSeconds = 50
+
+        val levelIndex = (board.levelNumber - 1).coerceAtLeast(0)
+        val extraWords = (board.targetWords.size - 3).coerceAtLeast(0)
+        val extraGridSize = (board.gridSize - 6).coerceAtLeast(0)
+
+        val extra3StarTime = (levelIndex * 0.35f).toInt() + (extraWords * 3) + (extraGridSize * 2)
+        val extra2StarTime = (levelIndex * 0.70f).toInt() + (extraWords * 6) + (extraGridSize * 4)
+
+        val threshold3Stars = base3StarSeconds + extra3StarTime
+        val threshold2Stars = base2StarSeconds + extra2StarTime
 
         val calculatedStars = when {
             hintsUsedInCurrentGame == 0 && duration <= threshold3Stars -> 3

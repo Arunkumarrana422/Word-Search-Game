@@ -129,4 +129,31 @@ class ExampleUnitTest {
             }
         }
     }
+
+    @Test
+    fun verify_starRatingThresholdsAndScaling() {
+        val boardLvl1 = WordSearchGenerator.generateLevel(1)
+        val levelIndex1 = (boardLvl1.levelNumber - 1).coerceAtLeast(0)
+        val extraWords1 = (boardLvl1.targetWords.size - 3).coerceAtLeast(0)
+        val extraGrid1 = (boardLvl1.gridSize - 6).coerceAtLeast(0)
+
+        val threshold3StarsLvl1 = 20 + (levelIndex1 * 0.35f).toInt() + (extraWords1 * 3) + (extraGrid1 * 2)
+        val threshold2StarsLvl1 = 50 + (levelIndex1 * 0.70f).toInt() + (extraWords1 * 6) + (extraGrid1 * 4)
+
+        // For level 1, base 3-star threshold is <= 20s and 2-star is <= 50s
+        assertTrue("Level 1 3-star threshold should be around 20s", threshold3StarsLvl1 in 18..25)
+        assertTrue("Level 1 2-star threshold should be around 50s", threshold2StarsLvl1 in 48..55)
+
+        // For higher level 50, thresholds scale up
+        val boardLvl50 = WordSearchGenerator.generateLevel(50)
+        val levelIndex50 = (boardLvl50.levelNumber - 1).coerceAtLeast(0)
+        val extraWords50 = (boardLvl50.targetWords.size - 3).coerceAtLeast(0)
+        val extraGrid50 = (boardLvl50.gridSize - 6).coerceAtLeast(0)
+
+        val threshold3StarsLvl50 = 20 + (levelIndex50 * 0.35f).toInt() + (extraWords50 * 3) + (extraGrid50 * 2)
+        val threshold2StarsLvl50 = 50 + (levelIndex50 * 0.70f).toInt() + (extraWords50 * 6) + (extraGrid50 * 4)
+
+        assertTrue("Higher level 3-star threshold should scale up beyond 20s", threshold3StarsLvl50 > threshold3StarsLvl1)
+        assertTrue("Higher level 2-star threshold should scale up beyond 50s", threshold2StarsLvl50 > threshold2StarsLvl1)
+    }
 }

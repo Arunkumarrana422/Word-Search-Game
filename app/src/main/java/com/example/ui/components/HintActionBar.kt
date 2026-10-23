@@ -51,8 +51,8 @@ fun HintActionBar(
         HintButtonItem(
             title = "Reveal Letter",
             icon = Icons.Default.Lightbulb,
-            cost = 25,
-            canAfford = coins >= 25,
+            cost = 3,
+            canAfford = coins >= 3,
             iconTint = Color(0xFFFFD54F),
             testTag = "hint_reveal_letter",
             onClick = onUseRevealLetter
@@ -61,8 +61,8 @@ fun HintActionBar(
         HintButtonItem(
             title = "First Letter",
             icon = Icons.Default.Visibility,
-            cost = 40,
-            canAfford = coins >= 40,
+            cost = 5,
+            canAfford = coins >= 5,
             iconTint = Color(0xFFFF4FA3),
             testTag = "hint_first_letter",
             onClick = onUseFirstLetter
@@ -71,8 +71,8 @@ fun HintActionBar(
         HintButtonItem(
             title = "Word Trail",
             icon = Icons.Default.Highlight,
-            cost = 60,
-            canAfford = coins >= 60,
+            cost = 8,
+            canAfford = coins >= 8,
             iconTint = Color(0xFF26D9F2),
             testTag = "hint_word_trail",
             onClick = onUsePathReveal

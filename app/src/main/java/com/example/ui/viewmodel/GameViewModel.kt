@@ -303,7 +303,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         starsEarned.value = calculatedStars
 
         val localLevel = ((board.levelNumber - 1) % 50) + 1
-        val earnedCoins = 30 + ((200 - 30) * (localLevel - 1).coerceAtMost(49) / 49)
+        val earnedCoins = 2 + ((localLevel - 1) * 4 / 49)
         val earnedXp = 50 + (calculatedStars * 20)
         coinsWon.value = earnedCoins
         xpWon.value = earnedXp
@@ -339,14 +339,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         startLevel(current, _currentMode.value)
     }
 
-    // Hint 1: Reveal 1 Letter (25 coins)
+    // Hint 1: Reveal 1 Letter (3 coins)
     fun useRevealLetterHint() {
         val board = _boardData.value ?: return
         val alreadyFound = _foundWords.value.map { it.word }.toSet()
         val unfound = board.placedWords.filter { !alreadyFound.contains(it.word) }
         if (unfound.isEmpty()) return
 
-        if (!repository.recordHintUsed(25)) return
+        if (!repository.recordHintUsed(3)) return
 
         hintsUsedInCurrentGame++
         soundManager.playHintUsed()
@@ -362,14 +362,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Hint 2: First Letter of an unfound word (40 coins)
+    // Hint 2: First Letter of an unfound word (5 coins)
     fun useFirstLetterHint() {
         val board = _boardData.value ?: return
         val alreadyFound = _foundWords.value.map { it.word }.toSet()
         val unfound = board.placedWords.filter { !alreadyFound.contains(it.word) }
         if (unfound.isEmpty()) return
 
-        if (!repository.recordHintUsed(40)) return
+        if (!repository.recordHintUsed(5)) return
 
         hintsUsedInCurrentGame++
         soundManager.playHintUsed()
@@ -380,14 +380,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _firstLetterHints.value = _firstLetterHints.value + firstCell
     }
 
-    // Hint 3: Path Reveal for 3 seconds (60 coins)
+    // Hint 3: Path Reveal for 3 seconds (8 coins)
     fun usePathRevealHint() {
         val board = _boardData.value ?: return
         val alreadyFound = _foundWords.value.map { it.word }.toSet()
         val unfound = board.placedWords.filter { !alreadyFound.contains(it.word) }
         if (unfound.isEmpty()) return
 
-        if (!repository.recordHintUsed(60)) return
+        if (!repository.recordHintUsed(8)) return
 
         hintsUsedInCurrentGame++
         soundManager.playHintUsed()

@@ -27,6 +27,7 @@ import com.example.ui.components.AmbientParticlesBackground
 import com.example.ui.components.HintActionBar
 import com.example.ui.components.LevelCompleteDialog
 import com.example.ui.components.PauseDialog
+import com.example.ui.components.TimeoutDialog
 import com.example.ui.components.TopGameBar
 import com.example.ui.components.WordChipsList
 import com.example.ui.components.WordGridBoard
@@ -54,6 +55,7 @@ fun GameplayScreen(
     val currentMode by viewModel.currentMode.collectAsState()
     val showPause by viewModel.showPauseDialog.collectAsState()
     val showComplete by viewModel.showLevelCompleteDialog.collectAsState()
+    val showTimeout by viewModel.showTimeoutDialog.collectAsState()
     val starsEarned by viewModel.starsEarned.collectAsState()
     val coinsWon by viewModel.coinsWon.collectAsState()
     val xpWon by viewModel.xpWon.collectAsState()
@@ -176,6 +178,19 @@ fun GameplayScreen(
                 onReplay = { viewModel.restartCurrentLevel() },
                 onHome = {
                     viewModel.showLevelCompleteDialog.value = false
+                    viewModel.navigateTo(GameScreen.HOME)
+                }
+            )
+        }
+
+        // Time Out Dialog
+        if (showTimeout) {
+            TimeoutDialog(
+                onRetry = {
+                    viewModel.retryDailyChallenge()
+                },
+                onHome = {
+                    viewModel.showTimeoutDialog.value = false
                     viewModel.navigateTo(GameScreen.HOME)
                 }
             )

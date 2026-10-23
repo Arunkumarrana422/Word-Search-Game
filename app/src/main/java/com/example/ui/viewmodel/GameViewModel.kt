@@ -85,8 +85,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val showLevelCompleteDialog = MutableStateFlow(false)
     val showDailyRewardDialog = MutableStateFlow(false)
     val showResetConfirmDialog = MutableStateFlow(false)
+    val showTimeoutDialog = MutableStateFlow(false)
     val showScratchCardDialog = MutableStateFlow(!repository.isScratchCardClaimed)
     val welcomeScratchCoins = (1..50).random()
+
+    private var dailyRetryCount = 0
 
     fun claimWelcomeScratchCard() {
         if (!repository.isScratchCardClaimed) {
@@ -165,6 +168,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         showPauseDialog.value = false
         showLevelCompleteDialog.value = false
+        showTimeoutDialog.value = false
 
         if (mode == GameMode.TIMED) {
             startTimer(90)
@@ -180,7 +184,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         hapticsManager.vibrateButton()
         _currentMode.value = GameMode.DAILY
         val todayStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
-        val seed = todayStr.toLongOrNull() ?: 20261022L
+        val seed = (todayStr.toLongOrNull() ?: 20261022L) + (dailyRetryCount * 997L)
         val world = WorldsRepository.ALL_WORLDS[2] // Cosmic Space for Daily
         _selectedWorld.value = world
 
@@ -195,9 +199,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _temporaryPathHint.value = null
         hintsUsedInCurrentGame = 0
         levelStartTime = System.currentTimeMillis()
-        stopTimer()
+
+        showPauseDialog.value = false
+        showLevelCompleteDialog.value = false
+        showTimeoutDialog.value = false
+
+        // Start 3-minute timer (180 seconds) for Daily Challenge
+        startTimer(180)
 
         _currentScreen.value = GameScreen.GAMEPLAY
+    }
+
+    fun retryDailyChallenge() {
+        dailyRetryCount++
+        startDailyChallenge()
     }
 
     fun startRelaxMode() {
@@ -214,14 +229,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         timerJob = viewModelScope.launch {
             while ((_timedRemainingSeconds.value ?: 0) > 0) {
                 delay(1000)
-                if (!showPauseDialog.value && !showLevelCompleteDialog.value) {
+                if (!showPauseDialog.value && !showLevelCompleteDialog.value && !showTimeoutDialog.value) {
                     val remaining = (_timedRemainingSeconds.value ?: 1) - 1
                     _timedRemainingSeconds.value = remaining
                     if (remaining == 0) {
                         // Time over sound
                         soundManager.playWordIncorrect()
                         hapticsManager.vibrateIncorrect()
-                        showPauseDialog.value = true
+                        if (_currentMode.value == GameMode.DAILY) {
+                            showTimeoutDialog.value = true
+                        } else {
+                            showPauseDialog.value = true
+                        }
                     }
                 }
             }
@@ -343,8 +362,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     fun restartCurrentLevel() {
         showPauseDialog.value = false
         showLevelCompleteDialog.value = false
-        val current = _boardData.value?.levelNumber ?: 1
-        startLevel(current, _currentMode.value)
+        showTimeoutDialog.value = false
+        if (_currentMode.value == GameMode.DAILY) {
+            retryDailyChallenge()
+        } else {
+            val current = _boardData.value?.levelNumber ?: 1
+            startLevel(current, _currentMode.value)
+        }
     }
 
     // Hint 1: Reveal 1 Letter (25 coins)

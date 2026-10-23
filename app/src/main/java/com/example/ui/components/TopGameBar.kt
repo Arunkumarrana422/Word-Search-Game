@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -53,41 +54,41 @@ fun TopGameBar(
     ) {
         // Center: Level or Daily Puzzle, and World / Timer
         Column(
-            horizontalAlignment = Alignment.Start,
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(1f)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Text(
-                    text = if (isDaily) "DAILY PUZZLE" else "LEVEL $levelNumber",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp,
-                        color = Color.White
-                    ),
-                    maxLines = 1
-                )
-            }
+            Text(
+                text = if (isDaily) "DAILY PUZZLE" else "LEVEL $levelNumber",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.5.sp,
+                    color = Color.White
+                ),
+                maxLines = 1
+            )
 
             if (remainingSeconds != null) {
+                Spacer(modifier = Modifier.height(2.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 1.dp)
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (remainingSeconds <= 30) Color(0x66FF5252) else Color(0x44000000))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Timer,
                         contentDescription = "Timer",
-                        tint = if (remainingSeconds <= 15) Color(0xFFFF5252) else Color(0xFFFFD54F),
-                        modifier = Modifier.size(12.dp)
+                        tint = if (remainingSeconds <= 30) Color(0xFFFF5252) else Color(0xFFFFD54F),
+                        modifier = Modifier.size(14.dp)
                     )
-                    Spacer(modifier = Modifier.width(3.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${remainingSeconds / 60}:${(remainingSeconds % 60).toString().padStart(2, '0')}",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = if (remainingSeconds <= 15) Color(0xFFFF5252) else Color(0xFFFFD54F)
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (remainingSeconds <= 30) Color(0xFFFF5252) else Color(0xFFFFD54F)
                         )
                     )
                 }

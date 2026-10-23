@@ -196,17 +196,37 @@ class GameRepository(private val context: Context) {
 
     fun checkAndClaimDailyLoginReward(): Int? {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-        val profile = _playerProfile.value
+        var profile = _playerProfile.value
         if (profile.lastRewardClaimDate == today) {
             return null // Already claimed today
         }
 
-        val days = (profile.consecutiveLoginDays % 7) + 1
-        val rewardAmount = days * 50
+        // Reset streak if more than 1 day missed
+        if (profile.lastRewardClaimDate.isNotEmpty()) {
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            try {
+                val lastDate = sdf.parse(profile.lastRewardClaimDate)
+                val todayDate = sdf.parse(today)
+                if (lastDate != null && todayDate != null) {
+                    val diffDays = ((todayDate.time - lastDate.time) / (1000 * 60 * 60 * 24)).toInt()
+                    if (diffDays > 1) {
+                        profile = profile.copy(consecutiveLoginDays = 1)
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore parse errors
+            }
+        }
+
+        val rewardAmounts = listOf(2, 4, 6, 8, 10, 12, 14)
+        val currentActiveDay = profile.consecutiveLoginDays.coerceIn(1, 7)
+        val rewardAmount = rewardAmounts[currentActiveDay - 1]
+
+        val nextDay = if (currentActiveDay >= 7) 1 else currentActiveDay + 1
         val updated = profile.copy(
             coins = profile.coins + rewardAmount,
             lastRewardClaimDate = today,
-            consecutiveLoginDays = days
+            consecutiveLoginDays = nextDay
         )
         savePlayerProfile(updated)
         return rewardAmount
@@ -246,7 +266,8 @@ class GameRepository(private val context: Context) {
         return initial.map { ach ->
             val prog = prefs.getInt("ach_prog_${ach.id}", 0)
             val claimed = prefs.getBoolean("ach_claimed_${ach.id}", false)
-            ach.copy(currentProgress = prog, isClaimed = claimed)
+            val cappedReward = ach.rewardCoins.coerceAtMost(20)
+            ach.copy(currentProgress = prog, isClaimed = claimed, rewardCoins = cappedReward)
         }
     }
 

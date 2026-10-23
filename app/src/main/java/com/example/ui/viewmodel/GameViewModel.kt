@@ -389,13 +389,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun claimDailyReward() {
+    fun claimDailyReward(): Int? {
         val amount = repository.checkAndClaimDailyLoginReward()
         if (amount != null) {
             soundManager.playCoinCollect()
+            soundManager.playAchievementUnlocked()
             hapticsManager.vibrateButton()
         }
-        showDailyRewardDialog.value = false
+        return amount
     }
 
     fun claimAchievement(id: String) {

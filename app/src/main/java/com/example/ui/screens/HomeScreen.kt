@@ -2,7 +2,16 @@ package com.example.ui.screens
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import com.example.data.model.Achievement
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,6 +54,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +85,7 @@ import com.example.ui.theme.glassCardColors
 @Composable
 fun HomeScreen(
     playerProfile: PlayerProfile,
+    achievements: List<Achievement> = emptyList(),
     onContinuePlaying: (Int) -> Unit,
     onSelectWorlds: () -> Unit,
     onDailyChallenge: () -> Unit,
@@ -87,6 +98,10 @@ fun HomeScreen(
 ) {
     val currentWorld = WorldsRepository.getWorldForLevel(playerProfile.currentLevel)
     val logoScale = remember { Animatable(0.9f) }
+
+    val todayStr = remember { SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()) }
+    val hasClaimableDaily = playerProfile.lastRewardClaimDate != todayStr
+    val hasClaimableBadges = achievements.any { it.isCompleted && !it.isClaimed }
 
     LaunchedEffect(Unit) {
         logoScale.animateTo(1f, tween(400, easing = FastOutSlowInEasing))
@@ -387,11 +402,12 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     SmallHubButton(
-                        text = "Daily Gift",
+                        text = "Daily",
                         icon = AppVectorIcons.Gift,
                         accentColor = CoinGold,
                         onClick = onDailyRewards,
                         testTag = "home_daily_rewards_button",
+                        isGlowing = hasClaimableDaily,
                         modifier = Modifier.weight(1f)
                     )
 
@@ -401,6 +417,7 @@ fun HomeScreen(
                         accentColor = StarYellow,
                         onClick = onAchievements,
                         testTag = "home_achievements_button",
+                        isGlowing = hasClaimableBadges,
                         modifier = Modifier.weight(1f)
                     )
 
@@ -410,6 +427,7 @@ fun HomeScreen(
                         accentColor = QuestCyan,
                         onClick = onStatistics,
                         testTag = "home_statistics_button",
+                        isGlowing = false,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -489,13 +507,42 @@ private fun SmallHubButton(
     accentColor: Color,
     onClick: () -> Unit,
     testTag: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isGlowing: Boolean = false
 ) {
+    val infinitePulse = rememberInfiniteTransition(label = "hub_glow_$text")
+    val pulseAlpha by infinitePulse.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow_alpha"
+    )
+    val pulseScale by infinitePulse.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow_scale"
+    )
+
     Box(
         modifier = modifier
+            .scale(if (isGlowing) pulseScale else 1.0f)
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.Black.copy(alpha = 0.28f))
-            .glassBorder(RoundedCornerShape(24.dp), borderColor = accentColor.copy(alpha = 0.6f))
+            .background(
+                if (isGlowing) accentColor.copy(alpha = 0.25f * pulseAlpha)
+                else Color.Black.copy(alpha = 0.28f)
+            )
+            .border(
+                width = if (isGlowing) 2.dp else 1.dp,
+                color = if (isGlowing) accentColor.copy(alpha = pulseAlpha) else accentColor.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(24.dp)
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 12.dp)
             .testTag(testTag),
@@ -520,6 +567,17 @@ private fun SmallHubButton(
                     color = Color.White
                 ),
                 maxLines = 1
+            )
+        }
+
+        if (isGlowing) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFFF1744))
+                    .border(1.5.dp, Color.White, CircleShape)
+                    .align(Alignment.TopEnd)
             )
         }
     }

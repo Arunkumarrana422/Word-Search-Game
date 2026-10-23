@@ -121,6 +121,7 @@ fun WordQuestApp(
         GameScreen.HOME -> {
             HomeScreen(
                 playerProfile = playerProfile,
+                achievements = achievements,
                 onContinuePlaying = { level ->
                     viewModel.startLevel(level)
                 },

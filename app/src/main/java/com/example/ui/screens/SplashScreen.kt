@@ -228,57 +228,57 @@ fun SplashScreen(
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
             ) {
-                // Loading Status Text
-                Text(
-                    text = loadingStatus,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White.copy(alpha = 0.8f)
-                    ),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Loading Progress Bar
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth(0.78f)
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = CoinGold,
-                    trackColor = Color.White.copy(alpha = 0.15f)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Primary Start Button
-                Button(
-                    onClick = onStartGame,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp)
-                        .testTag("splash_start_game_button"),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isReady) QuestGreen else QuestPurple
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                if (!isReady) {
+                    // Loading Status Text
                     Text(
-                        text = if (isReady) "TAP TO PLAY" else "START ADVENTURE",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp,
-                            color = Color.White
-                        )
+                        text = loadingStatus,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.8f)
+                        ),
+                        textAlign = TextAlign.Center
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Loading Progress Bar
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth(0.78f)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = CoinGold,
+                        trackColor = Color.White.copy(alpha = 0.15f)
+                    )
+                } else {
+                    // Primary Start Button (Visible only when loading is complete)
+                    Button(
+                        onClick = onStartGame,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp)
+                            .testTag("splash_start_game_button"),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = QuestGreen
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "TAP TO PLAY",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp,
+                                color = Color.White
+                            )
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

@@ -1,11 +1,26 @@
 package com.example.ui.components
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.rotate
+import kotlin.random.Random
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,11 +93,13 @@ fun PauseDialog(
     onHome: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxWidth(0.92f)
                 .glassBorder(RoundedCornerShape(24.dp), borderColor = MaterialTheme.colorScheme.primary)
                 .testTag("pause_dialog"),
             shape = RoundedCornerShape(24.dp),
@@ -234,11 +251,13 @@ fun LevelCompleteDialog(
         if (starsEarned >= 3) starScale3.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
     }
 
-    Dialog(onDismissRequest = {}) {
+    Dialog(
+        onDismissRequest = {},
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
+                .fillMaxWidth(0.92f)
                 .glassBorder(RoundedCornerShape(28.dp), borderColor = QuestGreen)
                 .testTag("level_complete_dialog"),
             shape = RoundedCornerShape(28.dp),
@@ -443,7 +462,129 @@ fun LevelCompleteDialog(
 }
 
 /**
- * Celebratory Reward Claim Dialog with spring scale animation, glowing icon, and theme glass border.
+ * Sunburst rotating glow rays canvas for celebratory background.
+ */
+@Composable
+fun SunburstRaysCanvas(
+    modifier: Modifier = Modifier,
+    color: Color = CoinGold.copy(alpha = 0.22f)
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "sunburst_rot")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "sunburst_angle"
+    )
+
+    Canvas(modifier = modifier) {
+        val centerPt = center
+        val radius = size.minDimension * 0.95f
+        val rayCount = 12
+        val rayAngle = 360f / rayCount
+
+        rotate(rotation, pivot = centerPt) {
+            for (i in 0 until rayCount step 2) {
+                val startAngle = i * rayAngle
+                drawArc(
+                    color = color,
+                    startAngle = startAngle,
+                    sweepAngle = rayAngle,
+                    useCenter = true,
+                    topLeft = Offset(centerPt.x - radius, centerPt.y - radius),
+                    size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2)
+                )
+            }
+        }
+    }
+}
+
+private data class ConfettiParticle(
+    val vx: Float,
+    val vy: Float,
+    val color: Color,
+    val size: Float,
+    val rotation: Float,
+    val isCircle: Boolean
+)
+
+/**
+ * Animated confetti explosion burst from center.
+ */
+@Composable
+fun ConfettiExplosionCanvas(
+    modifier: Modifier = Modifier,
+    particleCount: Int = 50
+) {
+    val animProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        animProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 2000, easing = FastOutSlowInEasing)
+        )
+    }
+
+    val particles = remember(particleCount) {
+        val rng = Random(42)
+        val colors = listOf(
+            CoinGold,
+            QuestGreen,
+            QuestPink,
+            StarYellow,
+            Color(0xFF00E5FF),
+            Color(0xFF9D4EDD),
+            Color(0xFFFF9100),
+            Color(0xFF00E676)
+        )
+        List(particleCount) {
+            val angle = rng.nextFloat() * 2f * Math.PI.toFloat()
+            val speed = rng.nextFloat() * 480f + 180f
+            ConfettiParticle(
+                vx = kotlin.math.cos(angle) * speed,
+                vy = kotlin.math.sin(angle) * speed - 180f,
+                color = colors[rng.nextInt(colors.size)],
+                size = rng.nextFloat() * 14f + 8f,
+                rotation = rng.nextFloat() * 360f,
+                isCircle = rng.nextBoolean()
+            )
+        }
+    }
+
+    Canvas(modifier = modifier) {
+        val cx = size.width / 2f
+        val cy = size.height / 2f
+        val t = animProgress.value
+        val gravity = 280f * t * t
+        val alpha = (1f - t).coerceIn(0f, 1f)
+
+        if (alpha > 0f) {
+            for (p in particles) {
+                val px = cx + p.vx * t
+                val py = cy + p.vy * t + gravity
+                val pColor = p.color.copy(alpha = alpha * 0.95f)
+
+                rotate(p.rotation + t * 720f, pivot = Offset(px, py)) {
+                    if (p.isCircle) {
+                        drawCircle(color = pColor, radius = p.size / 2f, center = Offset(px, py))
+                    } else {
+                        drawRect(
+                            color = pColor,
+                            topLeft = Offset(px - p.size / 2f, py - p.size / 4f),
+                            size = androidx.compose.ui.geometry.Size(p.size, p.size / 2f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Celebratory Reward Claim Dialog with animated confetti explosion, sunburst glow, animated coin counter, and pulsing button.
  */
 @Composable
 fun RewardClaimDialog(
@@ -451,114 +592,200 @@ fun RewardClaimDialog(
     coins: Int,
     onDismiss: () -> Unit
 ) {
-    val scaleAnim = remember { Animatable(0.5f) }
+    val scaleAnim = remember { Animatable(0.2f) }
+    val rotateAnim = remember { Animatable(-15f) }
+    var displayedCoins by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+
+    val infinitePulse = rememberInfiniteTransition(label = "pulse_button")
+    val buttonScale by infinitePulse.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "btn_scale"
+    )
+
     LaunchedEffect(Unit) {
-        scaleAnim.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        try {
+            val sound = com.example.audio.SoundManager()
+            sound.playCoinCollect()
+            sound.playAchievementUnlocked()
+        } catch (_: Exception) {}
+        scaleAnim.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow))
+        rotateAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
+    LaunchedEffect(coins) {
+        displayedCoins = 0
+        val steps = coins.coerceIn(1, 20)
+        val delayPerStep = (600 / steps).toLong()
+        for (i in 1..coins) {
+            displayedCoins = i
+            delay(delayPerStep)
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxWidth(0.92f)
                 .scale(scaleAnim.value)
-                .glassBorder(RoundedCornerShape(28.dp), borderColor = MaterialTheme.colorScheme.primary)
-                .testTag("reward_claim_dialog"),
-            shape = RoundedCornerShape(28.dp),
-            colors = dialogCardColors(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+                .rotate(rotateAnim.value),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(26.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .glassBorder(RoundedCornerShape(32.dp), borderColor = CoinGold)
+                    .testTag("reward_claim_dialog"),
+                shape = RoundedCornerShape(32.dp),
+                colors = dialogCardColors(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
             ) {
-                // Glowing Icon Box
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Celebration,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(40.dp)
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    SunburstRaysCanvas(
+                        modifier = Modifier
+                            .size(280.dp)
+                            .align(Alignment.Center)
                     )
-                }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(QuestGreen.copy(alpha = 0.85f), CoinGold.copy(alpha = 0.9f))
+                                    )
+                                )
+                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "🎁 DAILY GIFT UNLOCKED!",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.5.sp,
+                                    color = Color.Black
+                                )
+                            )
+                        }
 
-                Text(
-                    text = "REWARD CLAIMED!",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                )
+                        Spacer(modifier = Modifier.height(18.dp))
 
-                Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier.size(100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(96.dp)
+                                    .clip(CircleShape)
+                                    .background(CoinGold.copy(alpha = 0.25f))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.radialGradient(
+                                            listOf(CoinGold, Color(0xFFFF8F00))
+                                        )
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = AppVectorIcons.Gift,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(44.dp)
+                                )
+                            }
+                        }
 
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Black,
-                        color = Color.White
-                    ),
-                    textAlign = TextAlign.Center
-                )
+                        Spacer(modifier = Modifier.height(14.dp))
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Reward Pill
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.12f))
-                        .glassBorder(RoundedCornerShape(20.dp), borderColor = CoinGold.copy(alpha = 0.6f))
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = AppVectorIcons.Coin,
-                        contentDescription = null,
-                        tint = CoinGold,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "+$coins Coins",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            color = CoinGold
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Black,
+                                color = Color.White
+                            ),
+                            textAlign = TextAlign.Center
                         )
-                    )
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .testTag("reward_claim_ok_button"),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(
-                        text = "AWESOME!",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.White
-                        )
-                    )
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(Color.Black.copy(alpha = 0.4f))
+                                .border(2.dp, CoinGold, RoundedCornerShape(24.dp))
+                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = AppVectorIcons.Coin,
+                                contentDescription = null,
+                                tint = CoinGold,
+                                modifier = Modifier.size(28.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "+$displayedCoins COINS",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    color = CoinGold
+                                )
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .scale(buttonScale)
+                                .testTag("reward_claim_ok_button"),
+                            shape = CircleShape,
+                            colors = ButtonDefaults.buttonColors(containerColor = QuestGreen)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "AWESOME!",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color.White,
+                                        letterSpacing = 1.sp
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
+
+            ConfettiExplosionCanvas(
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
@@ -570,28 +797,31 @@ fun RewardClaimDialog(
 fun DailyRewardDialog(
     consecutiveDays: Int,
     isClaimedToday: Boolean,
-    onClaimReward: () -> Unit,
+    onClaimReward: () -> Int?,
     onDismiss: () -> Unit
 ) {
-    val rewardAmounts = listOf(50, 100, 150, 200, 250, 300, 500)
-    val todayReward = rewardAmounts.getOrElse((consecutiveDays - 1).coerceIn(0, 6)) { 100 }
+    val rewardAmounts = listOf(2, 4, 6, 8, 10, 12, 14)
+    val displayDay = consecutiveDays.coerceIn(1, 7)
     var showCelebration by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var claimedCoinsAmount by remember { androidx.compose.runtime.mutableIntStateOf(rewardAmounts[displayDay - 1]) }
 
     if (showCelebration) {
         RewardClaimDialog(
-            title = "Daily Login Gift (Day $consecutiveDays)",
-            coins = todayReward,
+            title = "Day $displayDay Daily Gift",
+            coins = claimedCoinsAmount,
             onDismiss = {
                 showCelebration = false
                 onDismiss()
             }
         )
     } else {
-        Dialog(onDismissRequest = onDismiss) {
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+        ) {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
+                    .fillMaxWidth(0.92f)
                     .glassBorder(RoundedCornerShape(24.dp), borderColor = MaterialTheme.colorScheme.primary)
                     .testTag("daily_reward_dialog"),
                 shape = RoundedCornerShape(24.dp),
@@ -700,7 +930,10 @@ fun DailyRewardDialog(
 
                     Button(
                         onClick = {
-                            onClaimReward()
+                            val reward = onClaimReward()
+                            if (reward != null) {
+                                claimedCoinsAmount = reward
+                            }
                             showCelebration = true
                         },
                         enabled = !isClaimedToday,
@@ -730,11 +963,13 @@ fun ResetProgressDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+                .fillMaxWidth(0.92f)
                 .glassBorder(RoundedCornerShape(24.dp), borderColor = Color(0xFFFF5252))
                 .testTag("reset_progress_dialog"),
             shape = RoundedCornerShape(24.dp),

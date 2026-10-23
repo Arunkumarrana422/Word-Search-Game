@@ -15,20 +15,20 @@ data class Achievement(
 
 object DefaultAchievements {
     fun createInitial(): List<Achievement> = listOf(
-        Achievement("first_step", "First Word", "Find your first hidden word", 1, 0, 50, false),
-        Achievement("level_5", "Curious Seeker", "Complete 5 levels", 5, 0, 75, false),
-        Achievement("level_20", "Pathfinder", "Complete 20 levels", 20, 0, 150, false),
-        Achievement("level_50", "World Traveler", "Complete World 1 (Level 50)", 50, 0, 300, false),
-        Achievement("level_100", "Deep Explorer", "Complete World 2 (Level 100)", 100, 0, 500, false),
-        Achievement("words_50", "Word Collector", "Find 50 words total", 50, 0, 100, false),
-        Achievement("words_200", "Lexicon Master", "Find 200 words total", 200, 0, 250, false),
-        Achievement("words_500", "Dictionary Devourer", "Find 500 words total", 500, 0, 600, false),
-        Achievement("stars_50", "Starlight Seeker", "Earn 50 stars", 50, 0, 120, false),
-        Achievement("stars_150", "Constellation", "Earn 150 stars", 150, 0, 350, false),
-        Achievement("speedy", "Speedy Finder", "Solve any puzzle under 30 seconds", 1, 0, 100, false),
-        Achievement("hintless_10", "Pure Intuition", "Complete 10 levels without using hints", 10, 0, 200, false),
-        Achievement("streak_3", "Committed Quester", "Complete 3 Daily Challenges", 3, 0, 200, false),
-        Achievement("diagonal_pro", "Diagonal Whisperer", "Find 30 diagonal words", 30, 0, 150, false)
+        Achievement("first_step", "First Word", "Find your first hidden word", 1, 0, 5, false),
+        Achievement("level_5", "Curious Seeker", "Complete 5 levels", 5, 0, 10, false),
+        Achievement("level_20", "Pathfinder", "Complete 20 levels", 20, 0, 15, false),
+        Achievement("level_50", "World Traveler", "Complete World 1 (Level 50)", 50, 0, 20, false),
+        Achievement("level_100", "Deep Explorer", "Complete World 2 (Level 100)", 100, 0, 20, false),
+        Achievement("words_50", "Word Collector", "Find 50 words total", 50, 0, 10, false),
+        Achievement("words_200", "Lexicon Master", "Find 200 words total", 200, 0, 15, false),
+        Achievement("words_500", "Dictionary Devourer", "Find 500 words total", 500, 0, 20, false),
+        Achievement("stars_50", "Starlight Seeker", "Earn 50 stars", 50, 0, 10, false),
+        Achievement("stars_150", "Constellation", "Earn 150 stars", 150, 0, 20, false),
+        Achievement("speedy", "Speedy Finder", "Solve any puzzle under 30 seconds", 1, 0, 10, false),
+        Achievement("hintless_10", "Pure Intuition", "Complete 10 levels without using hints", 10, 0, 15, false),
+        Achievement("streak_3", "Committed Quester", "Complete 3 Daily Challenges", 3, 0, 15, false),
+        Achievement("diagonal_pro", "Diagonal Whisperer", "Find 30 diagonal words", 30, 0, 10, false)
     )
 }
 

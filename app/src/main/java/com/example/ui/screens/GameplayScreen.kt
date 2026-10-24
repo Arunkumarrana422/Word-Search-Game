@@ -34,6 +34,8 @@ import com.example.ui.components.WordGridBoard
 import com.example.ui.viewmodel.GameScreen
 import com.example.ui.viewmodel.GameViewModel
 
+import com.example.ui.components.PraisePopupOverlay
+
 @Composable
 fun GameplayScreen(
     viewModel: GameViewModel,
@@ -51,6 +53,7 @@ fun GameplayScreen(
     val temporaryPathHint by viewModel.temporaryPathHint.collectAsState()
     val timedSeconds by viewModel.timedRemainingSeconds.collectAsState()
     val playerProfile by viewModel.playerProfile.collectAsState()
+    val praiseMessage by viewModel.praiseMessage.collectAsState()
 
     val currentMode by viewModel.currentMode.collectAsState()
     val showPause by viewModel.showPauseDialog.collectAsState()
@@ -83,10 +86,14 @@ fun GameplayScreen(
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val isTimedMode = currentMode == GameMode.TIMED
+            val timeAttackLvl by viewModel.currentTimeAttackLevel.collectAsState()
+
             // Header Bar
             TopGameBar(
-                levelNumber = currentBoard.levelNumber,
+                levelNumber = if (isTimedMode) timeAttackLvl else currentBoard.levelNumber,
                 isDaily = currentMode == GameMode.DAILY,
+                isTimed = isTimedMode,
                 worldName = world.name,
                 coins = playerProfile.coins,
                 difficultyTier = currentBoard.difficultyTier,
@@ -103,6 +110,7 @@ fun GameplayScreen(
                 firstLetterHints = firstLetterHints,
                 temporaryPathHint = temporaryPathHint,
                 boardBackgroundColor = activeCardBg,
+                borderColor = world.accentColor,
                 onWordSelected = { letters, path ->
                     viewModel.onWordSelected(letters, path)
                 },
@@ -167,13 +175,16 @@ fun GameplayScreen(
 
         // Level Complete Celebration Dialog
         if (showComplete) {
+            val isTimedMode = currentMode == GameMode.TIMED
+            val timeAttackLvl by viewModel.currentTimeAttackLevel.collectAsState()
             LevelCompleteDialog(
-                levelNumber = currentBoard.levelNumber,
+                levelNumber = if (isTimedMode) timeAttackLvl else currentBoard.levelNumber,
                 starsEarned = starsEarned,
                 coinsWon = coinsWon,
                 xpWon = xpWon,
                 timeTakenSeconds = timeTaken,
-                hasNextLevel = currentBoard.levelNumber < 500,
+                hasNextLevel = if (isTimedMode) timeAttackLvl < 10 else currentBoard.levelNumber < 1000,
+                isTimedMode = isTimedMode,
                 onNextLevel = { viewModel.nextLevel() },
                 onReplay = { viewModel.restartCurrentLevel() },
                 onHome = {
@@ -187,13 +198,18 @@ fun GameplayScreen(
         if (showTimeout) {
             TimeoutDialog(
                 onRetry = {
-                    viewModel.retryDailyChallenge()
+                    viewModel.restartCurrentLevel()
                 },
                 onHome = {
                     viewModel.showTimeoutDialog.value = false
                     viewModel.navigateTo(GameScreen.HOME)
                 }
             )
+        }
+
+        // Bouncy Praise Message Overlay (Awesome!, Perfect!, Genius!)
+        praiseMessage?.let { msg ->
+            PraisePopupOverlay(message = msg)
         }
     }
 }

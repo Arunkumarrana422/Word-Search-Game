@@ -105,6 +105,14 @@ class SoundManager {
         }
     }
 
+    fun playPraisePop() {
+        if (!isSoundEnabled) return
+        scope.launch {
+            // Cheerful bright double-ding praise chime (E5 -> A5 -> E6)
+            playArpeggio(listOf(659.25, 880.0, 1318.51), 55, 0.75f)
+        }
+    }
+
     private fun playTone(freqHz: Double, durationMs: Int, volume: Float) {
         val numSamples = (durationMs * sampleRate) / 1000
         val buffer = ShortArray(numSamples)

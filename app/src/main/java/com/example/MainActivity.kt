@@ -34,10 +34,12 @@ import androidx.activity.SystemBarStyle
 import com.example.ui.viewmodel.GameScreen
 import com.example.ui.viewmodel.GameViewModel
 
-import android.widget.Toast
-import android.app.Activity
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableLongStateOf
+import com.example.ui.components.TopExitToastBanner
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
@@ -79,16 +81,25 @@ fun WordQuestApp(
     val showScratchCard by viewModel.showScratchCardDialog.collectAsState()
 
     val context = LocalContext.current
-    var backPressedTime by remember { mutableStateOf(0L) }
+    val activity = context as? android.app.Activity
+    var backPressedTime by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0L) }
+    var showExitToast by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
+    LaunchedEffect(showExitToast) {
+        if (showExitToast) {
+            delay(2000)
+            showExitToast = false
+        }
+    }
 
     // Exit on double back press in Home screen
     BackHandler(enabled = currentScreen == GameScreen.HOME) {
         val currentTime = System.currentTimeMillis()
         if (currentTime - backPressedTime < 2000) {
-            (context as? Activity)?.finish()
+            activity?.finish()
         } else {
             backPressedTime = currentTime
-            Toast.makeText(context, "Press again to exit", Toast.LENGTH_SHORT).show()
+            showExitToast = true
         }
     }
 
@@ -96,6 +107,8 @@ fun WordQuestApp(
     BackHandler(enabled = currentScreen != GameScreen.SPLASH && currentScreen != GameScreen.HOME) {
         viewModel.navigateBack()
     }
+
+    Box(modifier = modifier.fillMaxSize()) {
 
     when (currentScreen) {
         GameScreen.SPLASH -> {
@@ -134,7 +147,7 @@ fun WordQuestApp(
                     viewModel.navigateTo(GameScreen.DAILY_CHALLENGE)
                 },
                 onTimeAttack = {
-                    viewModel.startLevel(playerProfile.currentLevel, com.example.data.model.GameMode.TIMED)
+                    viewModel.startTimeAttackLevel()
                 },
                 onRelaxMode = {
                     viewModel.startRelaxMode()
@@ -347,4 +360,11 @@ fun WordQuestApp(
             }
         )
     }
+
+    // Top Exit Toast Banner (Pill shaped with glass border)
+    TopExitToastBanner(
+        visible = showExitToast,
+        modifier = Modifier.align(Alignment.TopCenter)
+    )
+}
 }

@@ -249,6 +249,7 @@ fun LevelCompleteDialog(
     xpWon: Int,
     timeTakenSeconds: Int,
     hasNextLevel: Boolean,
+    isTimedMode: Boolean = false,
     onNextLevel: () -> Unit,
     onReplay: () -> Unit,
     onHome: () -> Unit
@@ -301,7 +302,7 @@ fun LevelCompleteDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "LEVEL COMPLETE!",
+                    text = if (isTimedMode) "TIME ATTACK COMPLETE!" else "LEVEL COMPLETE!",
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Black,
                         color = Color.White,
@@ -310,7 +311,7 @@ fun LevelCompleteDialog(
                 )
 
                 Text(
-                    text = "Level $levelNumber Solved in ${timeTakenSeconds}s",
+                    text = if (isTimedMode) "Time Level $levelNumber/10 Solved in ${timeTakenSeconds}s" else "Level $levelNumber Solved in ${timeTakenSeconds}s",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = Color.White.copy(alpha = 0.75f)
                     )
@@ -1391,7 +1392,7 @@ fun TimeoutDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "The 3-minute daily timer ran out. Try again with a new shuffled board layout!",
+                    text = "Time ran out! Try again with a new reshuffled board layout!",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = Color.White.copy(alpha = 0.8f),
                         textAlign = TextAlign.Center
@@ -1417,7 +1418,7 @@ fun TimeoutDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "TRY AGAIN (RESHUFFLE BOARD)",
+                        text = "TRY AGAIN",
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.ExtraBold,
                             color = Color.White

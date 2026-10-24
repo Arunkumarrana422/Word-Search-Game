@@ -130,7 +130,7 @@ fun OnboardingScreen(
                 item {
                     TutorialStepCard(
                         icon = AppVectorIcons.StarsSet,
-                        title = "5. 500 Progressive Levels",
+                        title = "5. 1000 Progressive Levels",
                         description = "Advance across 10 worlds with increasing board sizes and richer vocabularies. Earn stars, coins, and trophies!"
                     )
                 }

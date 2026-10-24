@@ -50,7 +50,7 @@ data class BoardData(
  * Game Modes available.
  */
 enum class GameMode(val displayName: String, val description: String) {
-    CLASSIC("Classic Quest", "500 progressive levels across 10 worlds"),
+    CLASSIC("Classic Quest", "1000 progressive levels across 10 worlds"),
     TIMED("Time Attack", "Beat the clock! Find words to gain extra time"),
     DAILY("Daily Challenge", "Unique puzzle every day with bonus streak rewards"),
     RELAX("Zen Relax", "No timer, peaceful vibes, and tranquil search"),
@@ -85,7 +85,7 @@ enum class DifficultyTier(
         directionsAllowed = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN),
         decoyRatio = 0.0f,
         startLevel = 1,
-        endLevel = 10,
+        endLevel = 20,
         color = Color(0xFF43D17A)
     ),
     EASY(
@@ -97,8 +97,8 @@ enum class DifficultyTier(
         maxWordLength = 5,
         directionsAllowed = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN, DirectionType.DIAGONAL_DOWN_RIGHT),
         decoyRatio = 0.08f,
-        startLevel = 11,
-        endLevel = 20,
+        startLevel = 21,
+        endLevel = 50,
         color = Color(0xFF81C784)
     ),
     NORMAL(
@@ -115,8 +115,8 @@ enum class DifficultyTier(
             DirectionType.HORIZONTAL_BACKWARD
         ),
         decoyRatio = 0.18f,
-        startLevel = 21,
-        endLevel = 50,
+        startLevel = 51,
+        endLevel = 120,
         color = Color(0xFF26D9F2)
     ),
     MEDIUM(
@@ -135,8 +135,8 @@ enum class DifficultyTier(
             DirectionType.VERTICAL_UP
         ),
         decoyRatio = 0.28f,
-        startLevel = 51,
-        endLevel = 100,
+        startLevel = 121,
+        endLevel = 250,
         color = Color(0xFFFFD54F)
     ),
     HARD(
@@ -148,8 +148,8 @@ enum class DifficultyTier(
         maxWordLength = 8,
         directionsAllowed = DirectionType.values().toList(),
         decoyRatio = 0.38f,
-        startLevel = 101,
-        endLevel = 200,
+        startLevel = 251,
+        endLevel = 450,
         color = Color(0xFFFF7043)
     ),
     EXPERT(
@@ -161,8 +161,8 @@ enum class DifficultyTier(
         maxWordLength = 9,
         directionsAllowed = DirectionType.values().toList(),
         decoyRatio = 0.48f,
-        startLevel = 201,
-        endLevel = 350,
+        startLevel = 451,
+        endLevel = 700,
         color = Color(0xFFE040FB)
     ),
     MASTER(
@@ -174,19 +174,19 @@ enum class DifficultyTier(
         maxWordLength = 10,
         directionsAllowed = DirectionType.values().toList(),
         decoyRatio = 0.58f,
-        startLevel = 351,
-        endLevel = 500,
+        startLevel = 701,
+        endLevel = 1000,
         color = Color(0xFFFFD700)
     );
 
     companion object {
         fun fromLevel(level: Int): DifficultyTier = when (level) {
-            in 1..10 -> NOVICE
-            in 11..20 -> EASY
-            in 21..50 -> NORMAL
-            in 51..100 -> MEDIUM
-            in 101..200 -> HARD
-            in 201..350 -> EXPERT
+            in 1..20 -> NOVICE
+            in 21..50 -> EASY
+            in 51..120 -> NORMAL
+            in 121..250 -> MEDIUM
+            in 251..450 -> HARD
+            in 451..700 -> EXPERT
             else -> MASTER
         }
     }

@@ -101,7 +101,7 @@ fun SplashScreen(
 
         // Progress simulation
         progress = 0.25f
-        loadingStatus = "Loading 500 Progressive Levels..."
+        loadingStatus = "Loading 1000 Progressive Levels..."
         delay(600)
 
         progress = 0.65f
@@ -215,7 +215,7 @@ fun SplashScreen(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FeaturePill("500 Levels", AppVectorIcons.Trophy)
+                    FeaturePill("1000 Levels", AppVectorIcons.Trophy)
                     FeaturePill("10 Worlds", AppVectorIcons.Globe)
                     FeaturePill("100% Offline", AppVectorIcons.Energy)
                 }

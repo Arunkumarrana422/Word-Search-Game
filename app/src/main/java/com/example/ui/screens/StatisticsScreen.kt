@@ -109,7 +109,7 @@ fun StatisticsScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 item {
-                    StatCardItem("Levels Beaten", "$completedLevels / 500", AppVectorIcons.Trophy, QuestGreen)
+                    StatCardItem("Levels Beaten", "$completedLevels / 1000", AppVectorIcons.Trophy, QuestGreen)
                 }
                 item {
                     StatCardItem("Total Stars", "$totalStars Stars", AppVectorIcons.StarsSet, StarYellow)

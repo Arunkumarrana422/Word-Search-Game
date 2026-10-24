@@ -43,9 +43,9 @@ object WordSearchGenerator {
     }
 
     /**
-     * Generate a board specifically for Daily Challenge with 10 words, 10x10 grid,
-     * diagonal & reverse cross directions, and word overlapping for high difficulty.
-     */
+    * Generate a board specifically for Daily Challenge with 10 words, 10x10 grid,
+    * diagonal & reverse cross directions, and word overlapping for high difficulty.
+    */
     fun generateDailyBoard(
         worldId: Int,
         seed: Long
@@ -119,6 +119,225 @@ object WordSearchGenerator {
             targetWords = targetWordList,
             placedWords = verifiedPlacedWords,
             difficultyTier = DifficultyTier.EXPERT
+        )
+    }
+
+    /**
+     * Level configuration for Time Attack Mode (10 Levels Max).
+     * Time limits scale level by level from 30 seconds to 3 minutes (180s).
+     * Grid sizes scale up to 8x8 with cross & overlapping words.
+     */
+    data class TimeAttackLevelConfig(
+        val levelNumber: Int,
+        val timeSeconds: Int,
+        val gridSize: Int,
+        val wordCount: Int,
+        val allowedDirections: List<DirectionType>,
+        val preferOverlap: Boolean,
+        val tier: DifficultyTier
+    ) {
+        companion object {
+            fun getConfig(levelNumber: Int): TimeAttackLevelConfig {
+                val lvl = levelNumber.coerceIn(1, 10)
+                return when (lvl) {
+                    1 -> TimeAttackLevelConfig(
+                        levelNumber = 1,
+                        timeSeconds = 30, // 30s
+                        gridSize = 5,
+                        wordCount = 3,
+                        allowedDirections = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN),
+                        preferOverlap = false,
+                        tier = DifficultyTier.NOVICE
+                    )
+                    2 -> TimeAttackLevelConfig(
+                        levelNumber = 2,
+                        timeSeconds = 45, // 45s
+                        gridSize = 5,
+                        wordCount = 4,
+                        allowedDirections = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN),
+                        preferOverlap = true,
+                        tier = DifficultyTier.NOVICE
+                    )
+                    3 -> TimeAttackLevelConfig(
+                        levelNumber = 3,
+                        timeSeconds = 60, // 1 min
+                        gridSize = 6,
+                        wordCount = 4,
+                        allowedDirections = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN, DirectionType.DIAGONAL_DOWN_RIGHT),
+                        preferOverlap = true,
+                        tier = DifficultyTier.EASY
+                    )
+                    4 -> TimeAttackLevelConfig(
+                        levelNumber = 4,
+                        timeSeconds = 75, // 1m 15s
+                        gridSize = 6,
+                        wordCount = 5,
+                        allowedDirections = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN, DirectionType.DIAGONAL_DOWN_RIGHT, DirectionType.DIAGONAL_UP_RIGHT),
+                        preferOverlap = true,
+                        tier = DifficultyTier.EASY
+                    )
+                    5 -> TimeAttackLevelConfig(
+                        levelNumber = 5,
+                        timeSeconds = 90, // 1.5 mins
+                        gridSize = 6,
+                        wordCount = 6,
+                        allowedDirections = listOf(DirectionType.HORIZONTAL_FORWARD, DirectionType.VERTICAL_DOWN, DirectionType.DIAGONAL_DOWN_RIGHT, DirectionType.DIAGONAL_UP_RIGHT),
+                        preferOverlap = true,
+                        tier = DifficultyTier.NORMAL
+                    )
+                    6 -> TimeAttackLevelConfig(
+                        levelNumber = 6,
+                        timeSeconds = 110, // 1m 50s
+                        gridSize = 7,
+                        wordCount = 6,
+                        allowedDirections = DirectionType.entries, // All 8 directions
+                        preferOverlap = true,
+                        tier = DifficultyTier.NORMAL
+                    )
+                    7 -> TimeAttackLevelConfig(
+                        levelNumber = 7,
+                        timeSeconds = 130, // 2m 10s
+                        gridSize = 7,
+                        wordCount = 7,
+                        allowedDirections = DirectionType.entries,
+                        preferOverlap = true,
+                        tier = DifficultyTier.MEDIUM
+                    )
+                    8 -> TimeAttackLevelConfig(
+                        levelNumber = 8,
+                        timeSeconds = 150, // 2.5 mins
+                        gridSize = 8,
+                        wordCount = 8,
+                        allowedDirections = DirectionType.entries,
+                        preferOverlap = true,
+                        tier = DifficultyTier.HARD
+                    )
+                    9 -> TimeAttackLevelConfig(
+                        levelNumber = 9,
+                        timeSeconds = 165, // 2m 45s
+                        gridSize = 8,
+                        wordCount = 9,
+                        allowedDirections = DirectionType.entries,
+                        preferOverlap = true,
+                        tier = DifficultyTier.EXPERT
+                    )
+                    else -> TimeAttackLevelConfig(
+                        levelNumber = 10,
+                        timeSeconds = 180, // 3 Minutes!
+                        gridSize = 8,
+                        wordCount = 10,
+                        allowedDirections = DirectionType.entries,
+                        preferOverlap = true,
+                        tier = DifficultyTier.MASTER
+                    )
+                }
+            }
+        }
+    }
+
+    private val timeAttackAllocatedWordsCache = mutableMapOf<Int, List<String>>()
+    private val timeAttackUsedWordsSet = mutableSetOf<String>()
+    private var timeAttackHighestCachedLevel = 0
+
+    @Synchronized
+    private fun getUniqueWordsForTimeAttackLevel(
+        levelNumber: Int,
+        maxWordLen: Int,
+        targetCount: Int,
+        seed: Long
+    ): List<String> {
+        val cached = timeAttackAllocatedWordsCache[levelNumber]
+        if (cached != null) return cached
+
+        for (lvl in (timeAttackHighestCachedLevel + 1)..levelNumber) {
+            val config = TimeAttackLevelConfig.getConfig(lvl)
+            val minLen = 3
+            val maxLen = minOf(6, config.gridSize)
+
+            // Pull unique words from master vocabulary that have never been used in Time Attack
+            val masterPool = ThemedWordBank.getWordsForWorld(1) + ThemedWordBank.getWordsForWorld(2) + ThemedWordBank.getWordsForWorld(3)
+            val candidates = masterPool
+                .map { it.uppercase().trim() }
+                .filter { it.length in minLen..maxLen && it !in timeAttackUsedWordsSet }
+                .distinct()
+
+            val lvlRandom = Random(seed + lvl * 8831L)
+            val countToPick = config.wordCount + 3
+            val chosen = candidates.shuffled(lvlRandom).take(countToPick)
+
+            timeAttackUsedWordsSet.addAll(chosen)
+            timeAttackAllocatedWordsCache[lvl] = chosen
+        }
+
+        timeAttackHighestCachedLevel = maxOf(timeAttackHighestCachedLevel, levelNumber)
+        return timeAttackAllocatedWordsCache[levelNumber] ?: emptyList()
+    }
+
+    /**
+     * Generate a board specifically for Time Attack mode (Level 1 to 10).
+     */
+    fun generateTimeAttackBoard(
+        levelNumber: Int,
+        seed: Long = System.currentTimeMillis()
+    ): BoardData {
+        val config = TimeAttackLevelConfig.getConfig(levelNumber)
+        val random = Random(seed)
+
+        val candidateWords = getUniqueWordsForTimeAttackLevel(
+            levelNumber = config.levelNumber,
+            maxWordLen = config.gridSize,
+            targetCount = config.wordCount,
+            seed = seed
+        ).shuffled(random)
+
+        val grid = Array(config.gridSize) { Array(config.gridSize) { ' ' } }
+        val placedWords = mutableListOf<PlacedWord>()
+        var colorCounter = 0
+
+        for (wordCandidate in candidateWords) {
+            if (placedWords.size >= config.wordCount) break
+
+            val word = wordCandidate.uppercase()
+            var placement = tryPlaceWord(grid, word, config.gridSize, config.allowedDirections, random, preferOverlap = config.preferOverlap)
+            if (placement == null && config.preferOverlap) {
+                placement = tryPlaceWord(grid, word, config.gridSize, config.allowedDirections, random, preferOverlap = false)
+            }
+            if (placement != null) {
+                placedWords.add(placement.copy(colorIndex = colorCounter++))
+            }
+        }
+
+        val targetLettersPool = placedWords.flatMap { it.word.toList() }.distinct()
+        val decoyRatio = 0.35f + (config.levelNumber * 0.03f)
+
+        for (r in 0 until config.gridSize) {
+            for (c in 0 until config.gridSize) {
+                if (grid[r][c] == ' ') {
+                    if (targetLettersPool.isNotEmpty() && random.nextFloat() < decoyRatio) {
+                        grid[r][c] = targetLettersPool[random.nextInt(targetLettersPool.size)]
+                    } else {
+                        grid[r][c] = FREQUENT_LETTERS[random.nextInt(FREQUENT_LETTERS.length)]
+                    }
+                }
+            }
+        }
+
+        val verifiedPlacedWords = placedWords.filter { placed ->
+            val reconstructed = placed.path.map { grid[it.row][it.col] }.joinToString("")
+            reconstructed == placed.word
+        }
+
+        val immutableGrid = grid.map { it.toList() }
+        val targetWordList = verifiedPlacedWords.map { it.word }
+
+        return BoardData(
+            levelNumber = config.levelNumber,
+            worldId = 1,
+            gridSize = config.gridSize,
+            grid = immutableGrid,
+            targetWords = targetWordList,
+            placedWords = verifiedPlacedWords,
+            difficultyTier = config.tier
         )
     }
 

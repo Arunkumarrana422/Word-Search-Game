@@ -32,11 +32,13 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
 import com.example.data.generator.WordSearchGenerator
 import com.example.data.model.BoardData
 import com.example.data.model.GridPos
 import com.example.data.model.PlacedWord
 import com.example.data.model.WordHighlightColors
+import com.example.ui.theme.glassBorder
 
 /**
  * Interactive Word Search Letter Grid with 8-direction drag detection,
@@ -50,6 +52,7 @@ fun WordGridBoard(
     firstLetterHints: Set<GridPos>,
     temporaryPathHint: List<GridPos>?,
     boardBackgroundColor: Color,
+    borderColor: Color = MaterialTheme.colorScheme.primary,
     onWordSelected: (String, List<GridPos>) -> Unit,
     onDragLetterPassed: () -> Unit,
     modifier: Modifier = Modifier
@@ -76,6 +79,7 @@ fun WordGridBoard(
             .fillMaxWidth()
             .aspectRatio(1f)
             .padding(12.dp)
+            .glassBorder(shape = RoundedCornerShape(20.dp), borderColor = borderColor)
             .testTag("word_search_grid_board"),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = boardBackgroundColor.copy(alpha = 0.85f)),

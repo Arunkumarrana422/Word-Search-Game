@@ -93,7 +93,7 @@ class GameRepository(private val context: Context) {
         val newCoins = oldProfile.coins + coinsReward
         val newXp = oldProfile.xp + xpReward
         val newPlayerLevel = 1 + (newXp / 120)
-        val nextLevel = maxOf(oldProfile.highestUnlockedLevel, levelNumber + 1).coerceAtMost(500)
+        val nextLevel = maxOf(oldProfile.highestUnlockedLevel, levelNumber + 1).coerceAtMost(1000)
         val completedCount = if (isFirstCompletion) oldProfile.completedLevelsCount + 1 else oldProfile.completedLevelsCount
 
         val updatedProfile = oldProfile.copy(
@@ -341,5 +341,36 @@ class GameRepository(private val context: Context) {
             .putInt("stat_no_hint_games", stats.perfectNoHintGames)
             .apply()
         _statistics.value = stats
+    }
+
+    // --- Persistent Time Attack Mode Progress ---
+    fun getTimeAttackCurrentLevel(): Int {
+        return prefs.getInt("time_attack_current_level", 1)
+    }
+
+    fun saveTimeAttackCurrentLevel(level: Int) {
+        prefs.edit().putInt("time_attack_current_level", level.coerceIn(1, 10)).apply()
+    }
+
+    fun getTimeAttackHighestUnlockedLevel(): Int {
+        return prefs.getInt("time_attack_highest_unlocked", 1)
+    }
+
+    fun saveTimeAttackHighestUnlockedLevel(level: Int) {
+        val currentHighest = getTimeAttackHighestUnlockedLevel()
+        if (level > currentHighest) {
+            prefs.edit().putInt("time_attack_highest_unlocked", level.coerceIn(1, 10)).apply()
+        }
+    }
+
+    fun getTimeAttackLevelStars(levelNumber: Int): Int {
+        return prefs.getInt("time_attack_stars_$levelNumber", 0)
+    }
+
+    fun saveTimeAttackLevelCompletion(levelNumber: Int, starsEarned: Int) {
+        val currentStars = getTimeAttackLevelStars(levelNumber)
+        val bestStars = maxOf(currentStars, starsEarned)
+        prefs.edit().putInt("time_attack_stars_$levelNumber", bestStars).apply()
+        saveTimeAttackHighestUnlockedLevel(levelNumber + 1)
     }
 }

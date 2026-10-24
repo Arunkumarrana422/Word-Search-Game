@@ -75,6 +75,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val _temporaryPathHint = MutableStateFlow<List<GridPos>?>(null)
     val temporaryPathHint: StateFlow<List<GridPos>?> = _temporaryPathHint.asStateFlow()
 
+    // Praise Message Overlay State
+    val praiseMessage = MutableStateFlow<String?>(null)
+    private val PRAISE_PHRASES = listOf(
+        "AWESOME!",
+        "PERFECT!",
+        "BRILLIANT!",
+        "GENIUS!",
+        "EXCELLENT!",
+        "SUPERB!",
+        "GREAT JOB!",
+        "FANTASTIC!",
+        "AMAZING!"
+    )
+
     // Timer for Timed Challenge
     private val _timedRemainingSeconds = MutableStateFlow<Int?>(null)
     val timedRemainingSeconds: StateFlow<Int?> = _timedRemainingSeconds.asStateFlow()
@@ -179,6 +193,42 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _currentScreen.value = GameScreen.GAMEPLAY
     }
 
+    val currentTimeAttackLevel = MutableStateFlow(repository.getTimeAttackCurrentLevel())
+
+    fun startTimeAttackLevel(levelNumber: Int = repository.getTimeAttackCurrentLevel()) {
+        soundManager.playButtonClick()
+        hapticsManager.vibrateButton()
+        val targetLvl = levelNumber.coerceIn(1, 10)
+        currentTimeAttackLevel.value = targetLvl
+        repository.saveTimeAttackCurrentLevel(targetLvl)
+        _currentMode.value = GameMode.TIMED
+
+        val world = WorldsRepository.ALL_WORLDS[(targetLvl - 1) % WorldsRepository.ALL_WORLDS.size]
+        _selectedWorld.value = world
+
+        val board = WordSearchGenerator.generateTimeAttackBoard(
+            levelNumber = targetLvl,
+            seed = System.currentTimeMillis() + kotlin.random.Random.nextLong()
+        )
+        val config = WordSearchGenerator.TimeAttackLevelConfig.getConfig(targetLvl)
+
+        _boardData.value = board
+        _foundWords.value = emptyList()
+        _revealedLetters.value = emptySet()
+        _firstLetterHints.value = emptySet()
+        _temporaryPathHint.value = null
+        hintsUsedInCurrentGame = 0
+        levelStartTime = System.currentTimeMillis()
+
+        showPauseDialog.value = false
+        showLevelCompleteDialog.value = false
+        showTimeoutDialog.value = false
+
+        startTimer(config.timeSeconds)
+
+        _currentScreen.value = GameScreen.GAMEPLAY
+    }
+
     fun startDailyChallenge() {
         soundManager.playButtonClick()
         hapticsManager.vibrateButton()
@@ -236,7 +286,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                         // Time over sound
                         soundManager.playWordIncorrect()
                         hapticsManager.vibrateIncorrect()
-                        if (_currentMode.value == GameMode.DAILY) {
+                        if (_currentMode.value == GameMode.DAILY || _currentMode.value == GameMode.TIMED) {
                             showTimeoutDialog.value = true
                         } else {
                             showPauseDialog.value = true
@@ -284,9 +334,27 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     matchedPlaced.startCol != matchedPlaced.endCol
             repository.recordWordFound(isDiagonal)
 
-            // If in Timed mode, award +10 seconds bonus
+            // If in Timed mode, award +5 seconds bonus
             if (_currentMode.value == GameMode.TIMED) {
-                _timedRemainingSeconds.value = (_timedRemainingSeconds.value ?: 0) + 10
+                _timedRemainingSeconds.value = (_timedRemainingSeconds.value ?: 0) + 5
+            }
+
+            // Display praise overlay only occasionally (approx 20-25% chance, not every word)
+            val isNotLastWord = updatedFound.size < board.targetWords.size
+            val shouldPraise = isNotLastWord && (
+                (updatedFound.size >= 3 && updatedFound.size % 3 == 0) ||
+                (kotlin.random.Random.nextFloat() < 0.22f)
+            )
+            if (shouldPraise) {
+                val phrase = PRAISE_PHRASES.random()
+                praiseMessage.value = phrase
+                soundManager.playPraisePop()
+                viewModelScope.launch {
+                    delay(1250)
+                    if (praiseMessage.value == phrase) {
+                        praiseMessage.value = null
+                    }
+                }
             }
 
             // Check if level completed!
@@ -307,8 +375,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         stopTimer()
 
         // Calculate stars with time thresholds scaling dynamically by difficulty & level number
-        // Base thresholds for Level 1: <= 20s = 3 Stars, <= 50s = 2 Stars, > 50s = 1 Star.
-        // As level & board complexity (target words count and grid size) increase, thresholds scale up proportionally.
         val base3StarSeconds = 20
         val base2StarSeconds = 50
 
@@ -329,8 +395,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
         starsEarned.value = calculatedStars
 
-        val localLevel = ((board.levelNumber - 1) % 50) + 1
-        val earnedCoins = 2 + ((localLevel - 1) * 4 / 49)
+        val localLevel = ((board.levelNumber - 1) % 100) + 1
+        val earnedCoins = 2 + ((localLevel - 1) * 4 / 99)
         val earnedXp = 50 + (calculatedStars * 20)
         coinsWon.value = earnedCoins
         xpWon.value = earnedXp
@@ -338,6 +404,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (_currentMode.value == GameMode.DAILY) {
             val dailyReward = repository.recordDailyChallengeCompleted()
             coinsWon.value = dailyReward
+        } else if (_currentMode.value == GameMode.TIMED) {
+            val currentLvl = currentTimeAttackLevel.value
+            repository.saveTimeAttackLevelCompletion(currentLvl, calculatedStars)
+            val nextLvl = (currentLvl + 1).coerceAtMost(10)
+            repository.saveTimeAttackCurrentLevel(nextLvl)
+            repository.addCoins(earnedCoins)
         } else {
             repository.saveLevelCompletion(
                 levelNumber = board.levelNumber,
@@ -354,9 +426,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun nextLevel() {
         showLevelCompleteDialog.value = false
-        val current = _boardData.value?.levelNumber ?: 1
-        val next = (current + 1).coerceAtMost(500)
-        startLevel(next, _currentMode.value)
+        if (_currentMode.value == GameMode.TIMED) {
+            val nextTimeLevel = currentTimeAttackLevel.value + 1
+            if (nextTimeLevel <= 10) {
+                startTimeAttackLevel(nextTimeLevel)
+            } else {
+                startTimeAttackLevel(1)
+            }
+        } else {
+            val current = _boardData.value?.levelNumber ?: 1
+            val next = (current + 1).coerceAtMost(1000)
+            startLevel(next, _currentMode.value)
+        }
     }
 
     fun restartCurrentLevel() {
@@ -365,6 +446,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         showTimeoutDialog.value = false
         if (_currentMode.value == GameMode.DAILY) {
             retryDailyChallenge()
+        } else if (_currentMode.value == GameMode.TIMED) {
+            startTimeAttackLevel(currentTimeAttackLevel.value)
         } else {
             val current = _boardData.value?.levelNumber ?: 1
             startLevel(current, _currentMode.value)

@@ -41,8 +41,8 @@ class GameRepository(private val context: Context) {
             consecutiveLoginDays = prefs.getInt("consecutive_login_days", 1),
             soundEnabled = prefs.getBoolean("sound_enabled", true),
             musicEnabled = prefs.getBoolean("music_enabled", true),
-            hapticsEnabled = prefs.getBoolean("haptics_enabled", true),
-            soundVolume = prefs.getFloat("sound_volume", 0.8f),
+            hapticsEnabled = prefs.getBoolean("haptics_enabled", false),
+            soundVolume = prefs.getFloat("sound_volume", 1.0f),
             reducedMotion = prefs.getBoolean("reduced_motion", false),
             selectedBoardTheme = prefs.getString("selected_board_theme", "WORLD") ?: "WORLD",
             completedLevelsCount = prefs.getInt("completed_levels_count", 0)
@@ -63,7 +63,7 @@ class GameRepository(private val context: Context) {
             .putInt("consecutive_login_days", profile.consecutiveLoginDays)
             .putBoolean("sound_enabled", profile.soundEnabled)
             .putBoolean("music_enabled", profile.musicEnabled)
-            .putBoolean("hapticsEnabled", profile.hapticsEnabled)
+            .putBoolean("haptics_enabled", profile.hapticsEnabled)
             .putFloat("sound_volume", profile.soundVolume)
             .putBoolean("reduced_motion", profile.reducedMotion)
             .putString("selected_board_theme", profile.selectedBoardTheme)

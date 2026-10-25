@@ -123,13 +123,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private var levelStartTime = 0L
     private var hintsUsedInCurrentGame = 0
 
+    val backgroundMusicManager = com.example.audio.BackgroundMusicManager()
+
     init {
-        // Sync sound and haptics settings with repository
+        // Sync sound, music, and haptics settings with repository
         viewModelScope.launch {
             playerProfile.collect { profile ->
                 soundManager.isSoundEnabled = profile.soundEnabled
                 soundManager.masterVolume = profile.soundVolume
                 hapticsManager.isHapticsEnabled = profile.hapticsEnabled
+                backgroundMusicManager.isMusicEnabled = profile.musicEnabled
             }
         }
     }

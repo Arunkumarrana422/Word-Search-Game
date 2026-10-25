@@ -16,7 +16,7 @@ data class PlayerProfile(
     val consecutiveLoginDays: Int = 1,
     val soundEnabled: Boolean = true,
     val musicEnabled: Boolean = true,
-    val hapticsEnabled: Boolean = true,
+    val hapticsEnabled: Boolean = false,
     val soundVolume: Float = 0.8f,
     val reducedMotion: Boolean = false,
     val selectedBoardTheme: String = "WORLD", // "WORLD", "DARK", "LIGHT", "NEON", "PASTEL"

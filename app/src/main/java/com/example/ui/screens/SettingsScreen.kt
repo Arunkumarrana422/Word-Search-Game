@@ -150,43 +150,6 @@ fun SettingsScreen(
                     )
                 }
 
-                // Volume Slider
-                item {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .glassBorder(RoundedCornerShape(18.dp), borderColor = MaterialTheme.colorScheme.primary),
-                        shape = RoundedCornerShape(18.dp),
-                        colors = glassCardColors()
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = "Master Volume",
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.White
-                                )
-                                Text(
-                                    text = "${(profile.soundVolume * 100).toInt()}%",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            Slider(
-                                value = profile.soundVolume,
-                                onValueChange = onVolumeChange,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = MaterialTheme.colorScheme.primary,
-                                    activeTrackColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
-                        }
-                    }
-                }
-
                 // Customization Section
                 item {
                     SettingsSectionTitle("VISUALS & ACCESSIBILITY")

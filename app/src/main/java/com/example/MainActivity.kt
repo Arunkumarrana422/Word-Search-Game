@@ -63,6 +63,18 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        if (viewModel.playerProfile.value.musicEnabled) {
+            viewModel.backgroundMusicManager.startMusic()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.backgroundMusicManager.stopMusic()
+    }
 }
 
 @Composable

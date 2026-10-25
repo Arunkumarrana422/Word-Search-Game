@@ -422,7 +422,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
-        soundManager.playLevelComplete()
         hapticsManager.vibrateLevelComplete()
         showLevelCompleteDialog.value = true
     }

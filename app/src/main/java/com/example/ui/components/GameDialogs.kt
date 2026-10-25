@@ -1060,8 +1060,6 @@ fun ScratchCardDialog(
     var currentPath by remember { androidx.compose.runtime.mutableStateOf<Path?>(null) }
     var totalDragDistance by remember { mutableFloatStateOf(0f) }
 
-    val soundManager = remember { com.example.audio.SoundManager() }
-
     val scaleAnim = remember { Animatable(0.3f) }
     val rotateAnim = remember { Animatable(-10f) }
 
@@ -1079,15 +1077,6 @@ fun ScratchCardDialog(
     LaunchedEffect(Unit) {
         scaleAnim.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow))
         rotateAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-    }
-
-    LaunchedEffect(isRevealed) {
-        if (isRevealed) {
-            try {
-                soundManager.playCoinCollect()
-                soundManager.playLevelComplete()
-            } catch (_: Exception) {}
-        }
     }
 
     Dialog(
@@ -1214,7 +1203,6 @@ fun ScratchCardDialog(
                                             onDragStart = { offset ->
                                                 val p = Path().apply { moveTo(offset.x, offset.y) }
                                                 currentPath = p
-                                                try { soundManager.playButtonClick() } catch (_: Exception) {}
                                             },
                                             onDrag = { change, _ ->
                                                 change.consume()

@@ -42,8 +42,8 @@ class SoundManager {
     fun playButtonClick() {
         if (!isSoundEnabled) return
         scope.launch {
-            // Soft clean button click
-            playSweepTone(1000.0, 1400.0, 30, 0.4f)
+            // Crisp gentle click (800Hz to 1200Hz sweep for 35ms)
+            playSweepTone(800.0, 1200.0, 35, 0.5f)
         }
     }
 

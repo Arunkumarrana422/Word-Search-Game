@@ -1214,7 +1214,7 @@ fun ScratchCardDialog(
                                             onDragStart = { offset ->
                                                 val p = Path().apply { moveTo(offset.x, offset.y) }
                                                 currentPath = p
-                                                try { soundManager.playLetterSelect() } catch (_: Exception) {}
+                                                try { soundManager.playButtonClick() } catch (_: Exception) {}
                                             },
                                             onDrag = { change, _ ->
                                                 change.consume()

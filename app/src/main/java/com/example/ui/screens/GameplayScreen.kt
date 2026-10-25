@@ -114,8 +114,8 @@ fun GameplayScreen(
                 onWordSelected = { letters, path ->
                     viewModel.onWordSelected(letters, path)
                 },
-                onDragLetterPassed = {
-                    viewModel.onSelectionLetterPassed()
+                onDragLetterPassed = { pathSize ->
+                    viewModel.onSelectionLetterPassed(pathSize)
                 },
                 modifier = Modifier.weight(1f, fill = false)
             )

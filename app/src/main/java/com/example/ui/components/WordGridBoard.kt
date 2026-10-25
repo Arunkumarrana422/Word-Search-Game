@@ -54,7 +54,7 @@ fun WordGridBoard(
     boardBackgroundColor: Color,
     borderColor: Color = MaterialTheme.colorScheme.primary,
     onWordSelected: (String, List<GridPos>) -> Unit,
-    onDragLetterPassed: () -> Unit,
+    onDragLetterPassed: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val gridSize = boardData.gridSize
@@ -99,7 +99,7 @@ fun WordGridBoard(
                             startCell = cell
                             currentPath = listOf(cell)
                             lastHoverCell = cell
-                            onDragLetterPassed()
+                            onDragLetterPassed(1)
                         },
                         onDragEnd = {
                             val path = currentPath
@@ -129,7 +129,7 @@ fun WordGridBoard(
                                 currentPath = newPath
                                 if (hovered != lastHoverCell) {
                                     lastHoverCell = hovered
-                                    onDragLetterPassed()
+                                    onDragLetterPassed(newPath.size)
                                 }
                             }
                         }

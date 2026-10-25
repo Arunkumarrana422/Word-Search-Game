@@ -306,8 +306,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _timedRemainingSeconds.value = null
     }
 
-    fun onSelectionLetterPassed() {
-        soundManager.playLetterSelect()
+    fun onSelectionLetterPassed(pathSize: Int = 1) {
+        soundManager.playLetterSelect(pathSize - 1)
         hapticsManager.vibrateLetterSelect()
     }
 

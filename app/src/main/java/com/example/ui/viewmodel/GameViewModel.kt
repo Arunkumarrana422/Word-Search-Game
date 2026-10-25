@@ -121,6 +121,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     val xpWon = MutableStateFlow(80)
     val timeTakenSeconds = MutableStateFlow(0)
     private var levelStartTime = 0L
+    private var lastWordFoundTime = 0L
     private var hintsUsedInCurrentGame = 0
 
     val backgroundMusicManager = com.example.audio.BackgroundMusicManager()
@@ -182,6 +183,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _temporaryPathHint.value = null
         hintsUsedInCurrentGame = 0
         levelStartTime = System.currentTimeMillis()
+        lastWordFoundTime = levelStartTime
 
         showPauseDialog.value = false
         showLevelCompleteDialog.value = false
@@ -222,6 +224,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _temporaryPathHint.value = null
         hintsUsedInCurrentGame = 0
         levelStartTime = System.currentTimeMillis()
+        lastWordFoundTime = levelStartTime
 
         showPauseDialog.value = false
         showLevelCompleteDialog.value = false
@@ -252,6 +255,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _temporaryPathHint.value = null
         hintsUsedInCurrentGame = 0
         levelStartTime = System.currentTimeMillis()
+        lastWordFoundTime = levelStartTime
 
         showPauseDialog.value = false
         showLevelCompleteDialog.value = false
@@ -342,18 +346,22 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 _timedRemainingSeconds.value = (_timedRemainingSeconds.value ?: 0) + 5
             }
 
-            // Display praise overlay only occasionally (approx 20-25% chance, not every word)
+            // Display praise message overlay based on time gap since last word found (silent, no sound clash)
+            val currentTime = System.currentTimeMillis()
+            val gapSeconds = (currentTime - lastWordFoundTime) / 1000f
+            lastWordFoundTime = currentTime
+
             val isNotLastWord = updatedFound.size < board.targetWords.size
-            val shouldPraise = isNotLastWord && (
-                (updatedFound.size >= 3 && updatedFound.size % 3 == 0) ||
-                (kotlin.random.Random.nextFloat() < 0.22f)
-            )
-            if (shouldPraise) {
-                val phrase = PRAISE_PHRASES.random()
+            if (isNotLastWord) {
+                val phrase = when {
+                    gapSeconds <= 3.5f -> listOf("LIGHTNING!", "SUPER FAST!", "SPEEDY!", "LIGHT SPEED!").random()
+                    gapSeconds <= 7.0f -> listOf("AWESOME!", "PERFECT!", "GENIUS!", "BRILLIANT!").random()
+                    gapSeconds <= 12.0f -> listOf("GREAT JOB!", "EXCELLENT!", "SUPERB!", "FANTASTIC!").random()
+                    else -> listOf("NICE FIND!", "KEEP GOING!", "WELL DONE!").random()
+                }
                 praiseMessage.value = phrase
-                soundManager.playPraisePop()
                 viewModelScope.launch {
-                    delay(1250)
+                    delay(1150)
                     if (praiseMessage.value == phrase) {
                         praiseMessage.value = null
                     }
